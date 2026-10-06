@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kayam · Confidentialité</title>
+<meta name="description" content="Politique de confidentialité de l'app Kayam.">
+<style>
+  :root { --cream:#F7F7F2; --surface:#FFFFFF; --dark:#1C261F; --sage:#737D73; --green:#5C8C33; --lime:#CCED78; --border:rgba(0,0,0,.09); }
+  @media (prefers-color-scheme: dark) {
+    :root { --cream:#0E1310; --surface:#1A211C; --dark:#F1F4EC; --sage:#9AA59B; --green:#A9D86E; --border:rgba(255,255,255,.09); }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--cream); color:var(--dark); font:16px/1.6 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:32px 16px 64px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
+  .logo { font-size:28px; font-weight:800; text-decoration:none; color:var(--dark); }
+  .logo span { color:var(--green); }
+  .lang a { color:var(--green); font-weight:600; text-decoration:none; margin-left:12px; }
+  h1 { font-size:32px; line-height:1.2; margin:8px 0 4px; }
+  h2 { font-size:20px; margin:32px 0 8px; }
+  .muted { color:var(--sage); }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:20px; margin:16px 0; }
+  table { width:100%; border-collapse:collapse; font-size:15px; }
+  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { color:var(--sage); font-weight:600; }
+  .pill { display:inline-block; background:var(--lime); color:#1C261F; border-radius:999px; padding:2px 10px; font-size:13px; font-weight:700; }
+  a { color:var(--green); }
+  section[lang] { scroll-margin-top:16px; }
+  hr { border:0; border-top:1px solid var(--border); margin:48px 0; }
+  .table-wrap { overflow-x:auto; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a class="logo" href="./">kayam<span>.</span></a>
+  <nav class="lang"><a href="#fr">Français</a><a href="#en">English</a></nav>
+</header>
+
+<section id="fr" lang="fr">
+  <h1>Politique de confidentialité</h1>
+  <p class="muted">Dernière mise à jour : 6 octobre 2026</p>
+
+  <div class="card">
+    <strong>En bref</strong>
+    <ul>
+      <li>Pas de publicité, pas de pistage, pas de revente de données. Jamais.</li>
+      <li>Tes repas, tes séances, tes pesées et tes photos restent <strong>sur ton téléphone</strong>.</li>
+      <li>Seuls ton compte, ton profil et ton cercle d'amis sont gardés en ligne (Supabase), pour que l'app fonctionne.</li>
+      <li>Tu peux exporter toutes tes données et supprimer ton compte depuis l'app, à tout moment.</li>
+    </ul>
+  </div>
+
+  <h2>1. Qui sommes-nous</h2>
+  <p>Kayam est une application iOS de nutrition et d'entraînement, éditée par l’équipe Kayam. Contact : <a href="mailto:kayam.support@gmail.com">kayam.support@gmail.com</a>.</p>
+
+  <h2>2. Ce que nous gardons, et où</h2>
+  <div class="card table-wrap">
+    <table>
+      <tr><th>Données</th><th>Où</th><th>Pourquoi</th></tr>
+      <tr><td>Adresse e-mail (ou compte Google)</td><td>En ligne (Supabase)</td><td>Te connecter à ton compte</td></tr>
+      <tr><td>Profil : prénom, sexe, date de naissance, taille, poids, objectif, jours d'entraînement, poids cible et rythme, objectifs du jour, régime et allergies, unités</td><td>En ligne (Supabase)</td><td>Calculer ton objectif du jour et retrouver ton profil sur un autre iPhone</td></tr>
+      <tr><td>Cercle d'amis : prénom, date de ta dernière séance, invitations, 👊</td><td>En ligne (Supabase)</td><td>Montrer à tes amis (et seulement à eux) si tu t'es entraîné aujourd'hui</td></tr>
+      <tr><td>Repas, plan alimentaire, aliments créés</td><td>Sur ton téléphone uniquement</td><td>Suivre ce que tu manges</td></tr>
+      <tr><td>Séances, routines, records, pesées</td><td>Sur ton téléphone uniquement</td><td>Suivre tes progrès</td></tr>
+      <tr><td>Photos de progrès et photo de profil</td><td>Sur ton téléphone uniquement (exclues de la sauvegarde iCloud)</td><td>Comparer avant / après</td></tr>
+    </table>
+  </div>
+  <p>Tes amis voient <strong>uniquement</strong> ton prénom, si tu t'es entraîné aujourd'hui et tes 👊. Jamais ton poids, tes photos, tes repas ni tes charges.</p>
+
+  <h2>3. Services utilisés</h2>
+  <ul>
+    <li><strong>Supabase</strong> : hébergement du compte, du profil et du cercle d'amis, avec accès protégé (chacun ne voit que ses propres données et celles que ses amis partagent).</li>
+    <li><strong>Google Sign-In</strong> : seulement si tu choisis « Continuer avec Google ».</li>
+    <li><strong>Open Food Facts</strong> : quand tu scannes un code-barres ou cherches un produit, le code-barres ou le texte recherché (et ton pays choisi) est envoyé à Open Food Facts. Aucune donnée personnelle n'est envoyée.</li>
+    <li><strong>Apple</strong> : notifications locales et Live Activities, gérées par ton iPhone.</li>
+  </ul>
+  <p>Aucun outil de publicité, de mesure d'audience ou de pistage n'est utilisé.</p>
+
+  <h2>4. Tes droits et tes choix</h2>
+  <ul>
+    <li><strong>Exporter</strong> : Profil → Préférences → « Exporter mes données » (un fichier JSON avec tout).</li>
+    <li><strong>Modifier</strong> : tout ton profil se modifie dans l'app.</li>
+    <li><strong>Supprimer</strong> : Profil → « Supprimer le compte » efface ton compte, ton profil et ton cercle d'amis en ligne, ainsi que les données gardées sur ce téléphone.</li>
+    <li><strong>Notifications</strong> : toutes se coupent dans Profil → Rappels, ou dans les Réglages de l'iPhone.</li>
+    <li>Selon ton pays (par exemple le RGPD en Europe), tu peux aussi demander l'accès, la correction ou la suppression de tes données par e-mail.</li>
+  </ul>
+
+  <h2>5. Durée de conservation</h2>
+  <p>Les données en ligne sont gardées tant que ton compte existe, et effacées quand tu le supprimes. Les données sur le téléphone sont effacées si tu supprimes ton compte ou l'app.</p>
+
+  <h2>6. Âge minimum</h2>
+  <p>Kayam est destinée aux personnes de 13 ans et plus.</p>
+
+  <h2>7. Santé</h2>
+  <p>Kayam donne des estimations (calories, protéines, rythme) à partir de formules reconnues. Ce n'est pas un avis médical. Demande conseil à un professionnel de santé si tu as un doute.</p>
+
+  <h2>8. Changements</h2>
+  <p>Si cette politique change, la date en haut de la page sera mise à jour, et les changements importants seront signalés dans l'app.</p>
+</section>
+
+<hr>
+
+<section id="en" lang="en">
+  <h1>Privacy Policy</h1>
+  <p class="muted">Last updated: October 6, 2026</p>
+
+  <div class="card">
+    <strong>In short</strong>
+    <ul>
+      <li>No ads, no tracking, no selling of data. Ever.</li>
+      <li>Your meals, workouts, weigh-ins and photos stay <strong>on your phone</strong>.</li>
+      <li>Only your account, profile and friends circle are stored online (Supabase), so the app can work.</li>
+      <li>You can export all your data and delete your account from the app at any time.</li>
+    </ul>
+  </div>
+
+  <h2>1. Who we are</h2>
+  <p>Kayam is an iOS nutrition and training app published by the Kayam team. Contact: <a href="mailto:kayam.support@gmail.com">kayam.support@gmail.com</a>.</p>
+
+  <h2>2. What we keep, and where</h2>
+  <div class="card table-wrap">
+    <table>
+      <tr><th>Data</th><th>Where</th><th>Why</th></tr>
+      <tr><td>Email address (or Google account)</td><td>Online (Supabase)</td><td>Sign you in</td></tr>
+      <tr><td>Profile: first name, sex, birth date, height, weight, goal, training days, target weight and pace, daily targets, diet and allergies, units</td><td>Online (Supabase)</td><td>Calculate your daily target and restore your profile on another iPhone</td></tr>
+      <tr><td>Friends circle: first name, date of your last workout, invites, 👊</td><td>Online (Supabase)</td><td>Show your friends (and only them) whether you trained today</td></tr>
+      <tr><td>Meals, meal plan, foods you created</td><td>On your phone only</td><td>Track what you eat</td></tr>
+      <tr><td>Workouts, routines, records, weigh-ins</td><td>On your phone only</td><td>Track your progress</td></tr>
+      <tr><td>Progress photos and profile photo</td><td>On your phone only (excluded from iCloud backup)</td><td>Compare before / after</td></tr>
+    </table>
+  </div>
+  <p>Your friends <strong>only</strong> see your first name, whether you trained today, and your 👊. Never your weight, photos, meals or lifts.</p>
+
+  <h2>3. Services we use</h2>
+  <ul>
+    <li><strong>Supabase</strong>: hosts your account, profile and friends circle, with protected access (everyone only sees their own data and what their friends share).</li>
+    <li><strong>Google Sign-In</strong>: only if you choose "Continue with Google".</li>
+    <li><strong>Open Food Facts</strong>: when you scan a barcode or search a product, the barcode or search text (and your chosen country) is sent to Open Food Facts. No personal data is sent.</li>
+    <li><strong>Apple</strong>: local notifications and Live Activities, handled by your iPhone.</li>
+  </ul>
+  <p>No advertising, analytics or tracking tools are used.</p>
+
+  <h2>4. Your rights and choices</h2>
+  <ul>
+    <li><strong>Export</strong>: Profile → Preferences → "Export my data" (one JSON file with everything).</li>
+    <li><strong>Edit</strong>: your whole profile can be edited in the app.</li>
+    <li><strong>Delete</strong>: Profile → "Delete account" erases your account, profile and friends circle online, and the data kept on this phone.</li>
+    <li><strong>Notifications</strong>: all can be turned off in Profile → Reminders, or in iPhone Settings.</li>
+    <li>Depending on where you live (for example GDPR in Europe), you can also request access, correction or deletion of your data by email.</li>
+  </ul>
+
+  <h2>5. Retention</h2>
+  <p>Online data is kept while your account exists and erased when you delete it. On-device data is erased if you delete your account or the app.</p>
+
+  <h2>6. Minimum age</h2>
+  <p>Kayam is meant for people aged 13 and over.</p>
+
+  <h2>7. Health</h2>
+  <p>Kayam gives estimates (calories, protein, pace) based on recognized formulas. It is not medical advice. Ask a health professional if in doubt.</p>
+
+  <h2>8. Changes</h2>
+  <p>If this policy changes, the date at the top will be updated, and important changes will be announced in the app.</p>
+</section>
+</main>
+</body>
+</html>
