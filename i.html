@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Kayam · Invitation</title>
+<style>
+  :root { --cream:#F7F7F2; --card:#FFFFFF; --dark:#1C261F; --sage:#737D73; --green:#5C8C33; --lime:#CCED78; --line:rgba(0,0,0,.06); }
+  @media (prefers-color-scheme: dark) { :root { --cream:#0E1310; --card:#161D18; --dark:#F1F4EC; --sage:#9AA59B; --green:#A9D86E; --line:rgba(255,255,255,.08); } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--cream); color:var(--dark); font:17px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding:32px 16px 48px; }
+  main { max-width:480px; margin:0 auto; }
+  .logo { font-size:28px; font-weight:800; margin:0 0 20px; }
+  .logo span { color:var(--green); }
+  h1 { font-size:30px; line-height:1.15; margin:0 0 6px; }
+  p.sub { color:var(--sage); margin:0 0 22px; }
+  .card { background:var(--card); border-radius:18px; padding:16px; margin:0 0 12px; box-shadow:0 6px 18px rgba(0,0,0,.06); }
+  .card h2 { font-size:18px; margin:0 0 8px; }
+  .row { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px solid var(--line); font-weight:600; font-size:15px; }
+  .row:first-of-type { border-top:0; }
+  .row b { color:var(--green); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  a.button { display:block; text-align:center; background:var(--lime); color:#1C261F; font-weight:700; text-decoration:none; padding:16px; border-radius:16px; margin:20px 0 10px; font-size:18px; }
+  .note { color:var(--sage); font-size:14px; text-align:center; }
+  .code { font-size:40px; font-weight:800; letter-spacing:4px; text-align:center; margin:12px 0; font-variant-numeric:tabular-nums; }
+  [dir=rtl] .row { flex-direction:row-reverse; }
+</style>
+</head>
+<body>
+<main>
+  <p class="logo">kayam<span>.</span></p>
+  <h1 id="title"></h1>
+  <p class="sub" id="sub"></p>
+  <div class="card"><div class="code" id="code"></div></div>
+  <a class="button" id="open" href="#"></a>
+  <p class="note" id="note"></p>
+</main>
+<script>
+const lang = (navigator.language || "en").slice(0, 2);
+const T = {
+  fr: { title: "Rejoins mon cercle Kayam", sub: "On s'encourage entre amis : qui s'est entraîné aujourd'hui, et un 👊 pour se motiver.", open: "Ouvrir dans Kayam", note: "Ou tape ce code dans Kayam : Progrès → Amis. Pas encore Kayam ? L'app arrive bientôt sur l'App Store." },
+  he: { title: "הצטרף למעגל ה־Kayam שלי", sub: "מעודדים אחד את השני: מי התאמן היום, ו־👊 למוטיבציה.", open: "פתח ב־Kayam", note: "או הקלד את הקוד ב־Kayam: התקדמות ← חברים. עוד אין לך Kayam? האפליקציה תגיע בקרוב ל־App Store." },
+  en: { title: "Join my Kayam circle", sub: "We cheer each other on: who trained today, and a 👊 to stay motivated.", open: "Open in Kayam", note: "Or enter this code in Kayam: Progress → Friends. No Kayam yet? The app is coming soon to the App Store." }
+}[lang] || null;
+const t = T || { title: "Join my Kayam circle", sub: "We cheer each other on: who trained today, and a 👊 to stay motivated.", open: "Open in Kayam", note: "Or enter this code in Kayam: Progress → Friends. No Kayam yet? The app is coming soon to the App Store." };
+if (lang === "he") document.documentElement.dir = "rtl";
+const code = location.hash.slice(1).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
+const $ = id => document.getElementById(id);
+$("title").textContent = t.title;
+$("sub").textContent = t.sub;
+$("code").textContent = code || "—";
+$("open").textContent = t.open;
+$("open").href = "kayam://invite/" + code;
+$("note").textContent = t.note;
+</script>
+</body>
+</html>

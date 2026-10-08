@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Kayam · Routine</title>
+<style>
+  :root { --cream:#F7F7F2; --card:#FFFFFF; --dark:#1C261F; --sage:#737D73; --green:#5C8C33; --lime:#CCED78; --line:rgba(0,0,0,.06); }
+  @media (prefers-color-scheme: dark) { :root { --cream:#0E1310; --card:#161D18; --dark:#F1F4EC; --sage:#9AA59B; --green:#A9D86E; --line:rgba(255,255,255,.08); } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--cream); color:var(--dark); font:17px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding:32px 16px 48px; }
+  main { max-width:480px; margin:0 auto; }
+  .logo { font-size:28px; font-weight:800; margin:0 0 20px; }
+  .logo span { color:var(--green); }
+  h1 { font-size:30px; line-height:1.15; margin:0 0 6px; }
+  p.sub { color:var(--sage); margin:0 0 22px; }
+  .card { background:var(--card); border-radius:18px; padding:16px; margin:0 0 12px; box-shadow:0 6px 18px rgba(0,0,0,.06); }
+  .card h2 { font-size:18px; margin:0 0 8px; }
+  .row { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px solid var(--line); font-weight:600; font-size:15px; }
+  .row:first-of-type { border-top:0; }
+  .row b { color:var(--green); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  a.button { display:block; text-align:center; background:var(--lime); color:#1C261F; font-weight:700; text-decoration:none; padding:16px; border-radius:16px; margin:20px 0 10px; font-size:18px; }
+  .note { color:var(--sage); font-size:14px; text-align:center; }
+  .code { font-size:40px; font-weight:800; letter-spacing:4px; text-align:center; margin:12px 0; font-variant-numeric:tabular-nums; }
+  [dir=rtl] .row { flex-direction:row-reverse; }
+</style>
+</head>
+<body>
+<main>
+  <p class="logo">kayam<span>.</span></p>
+  <h1 id="title"></h1>
+  <p class="sub" id="sub"></p>
+  <div id="list"></div>
+  <a class="button" id="open" href="#"></a>
+  <p class="note" id="note"></p>
+</main>
+<script>
+// La routine est dans le lien, après le # : elle n'est jamais envoyée au serveur.
+const NAMES = {"Bench Press (Barbell)":["Développé couché (barre)","לחיצת חזה (מוט)"],"Bench Press (Dumbbell)":["Développé couché (haltères)","לחיצת חזה (משקולות)"],"Incline Bench Press (Barbell)":["Développé incliné (barre)","לחיצת חזה בשיפוע (מוט)"],"Incline Bench Press (Dumbbell)":["Développé incliné (haltères)","לחיצת חזה בשיפוע (משקולות)"],"Chest Fly (Machine)":["Écarté (machine)","פרפר (מכונה)"],"Cable Crossover":["Écarté à la poulie","קרוס אובר בכבלים"],"Push Up":["Pompes","שכיבות סמיכה"],"Chest Dip":["Dips (pectoraux)","מקבילים (חזה)"],"Pull Up":["Tractions (pronation)","מתח"],"Chin Up":["Tractions (supination)","מתח באחיזה הפוכה"],"Lat Pulldown (Cable)":["Tirage vertical (poulie)","פולי עליון"],"Bent Over Row (Barbell)":["Rowing barre","חתירה במוט"],"Dumbbell Row":["Rowing haltère","חתירה במשקולת"],"Seated Cable Row":["Tirage horizontal (poulie)","חתירה בישיבה בכבל"],"T Bar Row":["Rowing T-bar","חתירת T"],"Deadlift (Barbell)":["Soulevé de terre (barre)","דדליפט (מוט)"],"Overhead Press (Barbell)":["Développé militaire (barre)","לחיצת כתפיים (מוט)"],"Shoulder Press (Dumbbell)":["Développé épaules (haltères)","לחיצת כתפיים (משקולות)"],"Lateral Raise (Dumbbell)":["Élévations latérales (haltères)","הרחקת כתפיים (משקולות)"],"Rear Delt Fly (Dumbbell)":["Oiseau (haltères)","פרפר אחורי (משקולות)"],"Face Pull (Cable)":["Face pull (poulie)","פייס פול (כבל)"],"Bicep Curl (Barbell)":["Curl biceps (barre)","כפיפת מרפקים (מוט)"],"Bicep Curl (Dumbbell)":["Curl biceps (haltères)","כפיפת מרפקים (משקולות)"],"Hammer Curl (Dumbbell)":["Curl marteau (haltères)","כפיפת פטיש (משקולות)"],"Bicep Curl (Cable)":["Curl biceps (poulie)","כפיפת מרפקים (כבל)"],"Triceps Pushdown (Cable)":["Extension triceps (poulie)","פשיטת מרפקים (כבל)"],"Skullcrusher (Barbell)":["Barre au front","סקאלקראשר (מוט)"],"Overhead Triceps Extension (Dumbbell)":["Extension triceps nuque (haltère)","פשיטת מרפקים מעל הראש (משקולת)"],"Close Grip Bench Press":["Développé couché prise serrée","לחיצת חזה באחיזה צרה"],"Squat (Barbell)":["Squat (barre)","סקוואט (מוט)"],"Goblet Squat (Dumbbell)":["Squat goblet (haltère)","גובלט סקוואט (משקולת)"],"Leg Press (Machine)":["Presse à cuisses","לחיצת רגליים (מכונה)"],"Romanian Deadlift (Barbell)":["Soulevé de terre jambes tendues (barre)","דדליפט רומני (מוט)"],"Lunge (Dumbbell)":["Fentes (haltères)","מכרעים (משקולות)"],"Bulgarian Split Squat (Dumbbell)":["Squat bulgare (haltères)","סקוואט בולגרי (משקולות)"],"Leg Extension (Machine)":["Leg extension (machine)","פשיטת ברכיים (מכונה)"],"Lying Leg Curl (Machine)":["Leg curl allongé (machine)","כפיפת ברכיים בשכיבה (מכונה)"],"Calf Raise (Machine)":["Mollets (machine)","הרמות עקב (מכונה)"],"Hip Thrust (Barbell)":["Hip thrust (barre)","היפ ת'ראסט (מוט)"],"Glute Bridge":["Pont fessier","גשר ישבן"],"Kettlebell Swing":["Swing kettlebell","סווינג קטלבל"],"Plank":["Gainage (planche)","פלאנק"],"Crunch":["Crunch","כפיפות בטן"],"Hanging Leg Raise":["Relevés de jambes suspendu","הרמות רגליים בתלייה"],"Cable Crunch":["Crunch à la poulie","כפיפות בטן בכבל"],"Russian Twist":["Rotations russes","טוויסט רוסי"],"Pilates Class":["Cours de Pilates","שיעור פילאטיס"],"Hundred (Pilates)":["Le Hundred (Pilates)","ההאנדרד (פילאטיס)"],"Roll Up (Pilates)":["Enroulé (Pilates)","רול אפ (פילאטיס)"],"Dead Bug":["Dead bug","דד באג"],"Scissor Kick":["Ciseaux","מספריים"],"Side Plank":["Gainage latéral","פלאנק צידי"],"Jackknife Sit-Up":["Relevé de buste en V","כפיפת בטן V"],"Superman":["Superman","סופרמן"],"Single Leg Glute Bridge":["Pont fessier sur une jambe","גשר ישבן על רגל אחת"],"Side Leg Raise":["Élévation de jambe latérale","הרמת רגל לצד"],"Running":["Course à pied","ריצה"],"Treadmill Run":["Course sur tapis","ריצה על הליכון"],"Treadmill Walk":["Marche sur tapis","הליכה על הליכון"],"Cycling":["Vélo","רכיבה על אופניים"],"Stationary Bike":["Vélo d'appartement","אופני כושר"],"Rowing Machine":["Rameur","מכונת חתירה"],"Elliptical":["Vélo elliptique","אליפטיקל"],"Stair Climber":["Simulateur d'escaliers","מדרגות"],"Jump Rope":["Corde à sauter","קפיצה בחבל"],"Burpee":["Burpees","ברפי"],"Mountain Climbers":["Mountain climbers","מטפסי הרים"],"Jumping Jacks":["Jumping jacks","קפיצות פיסוק"],"Assault Bike":["Assault bike","אסולט בייק"],"SkiErg":["SkiErg","סקי ארג"],"Recumbent Bike":["Vélo semi-allongé","אופניים שכובים"],"Spin Class":["Cours de RPM / spinning","ספינינג"],"StepMill":["StepMill (escalier roulant)","סטפמיל"],"Battle Ropes":["Cordes ondulatoires","חבלי קרב"],"Boxing (Heavy Bag)":["Boxe (sac de frappe)","איגרוף (שק)"],"Swimming":["Natation","שחייה"],"Sled Push":["Poussée de traîneau","דחיפת מזחלת"],"Box Jump":["Box jump","קפיצה לקופסה"]};
+const lang = (navigator.language || "en").slice(0, 2);
+const L = {
+  fr: { one: "Une routine pour toi", many: "Un programme pour toi", sub: "Un ami te la partage. Ouvre-la dans Kayam pour l'ajouter à tes routines.", open: "Ouvrir dans Kayam", note: "Pas encore Kayam ? L'app arrive bientôt sur l'App Store.", bad: "Ce lien est incomplet. Demande à ton ami de te le renvoyer." },
+  he: { one: "רוטינה בשבילך", many: "תוכנית בשבילך", sub: "חבר שיתף אותה איתך. פתח אותה ב־Kayam כדי להוסיף לרוטינות שלך.", open: "פתח ב־Kayam", note: "עוד אין לך Kayam? האפליקציה תגיע בקרוב ל־App Store.", bad: "הקישור לא שלם. בקש מהחבר לשלוח אותו שוב." },
+  en: { one: "A routine for you", many: "A program for you", sub: "A friend shared it with you. Open it in Kayam to add it to your routines.", open: "Open in Kayam", note: "No Kayam yet? The app is coming soon to the App Store.", bad: "This link is incomplete. Ask your friend to send it again." }
+}[lang] || null;
+const T = L || { one: "A routine for you", many: "A program for you", sub: "A friend shared it with you. Open it in Kayam to add it to your routines.", open: "Open in Kayam", note: "No Kayam yet? The app is coming soon to the App Store.", bad: "This link is incomplete. Ask your friend to send it again." };
+if (lang === "he") document.documentElement.dir = "rtl";
+document.documentElement.lang = L ? lang : "en";
+
+const data = location.hash.slice(1);
+const $ = id => document.getElementById(id);
+$("open").textContent = T.open;
+$("open").href = "kayam://routine#" + data;
+$("note").textContent = T.note;
+
+function display(name) {
+  const n = NAMES[name];
+  if (!n) return name;
+  return lang === "fr" ? n[0] : lang === "he" ? n[1] : name;
+}
+function sets(e) {
+  const all = Array.isArray(e.s) ? e.s : [];
+  const work = all.filter(x => x && x.k !== "warmup");
+  const s = work.length ? work : all;
+  const first = s[0] || {};
+  if (first.sec) return s.length + " × " + Math.round(first.sec / 60) + " min";
+  return s.length + " × " + (first.p || "–");
+}
+async function decode(text) {
+  let b = text.replace(/-/g, "+").replace(/_/g, "/");
+  while (b.length % 4) b += "=";
+  const bytes = Uint8Array.from(atob(b), c => c.charCodeAt(0));
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  return JSON.parse(await new Response(stream).text());
+}
+(async () => {
+  try {
+    if (!data || data.length > 20000) throw new Error("empty");
+    const payload = await decode(data);
+    const routines = (payload.r || []).slice(0, 12);
+    if (!routines.length) throw new Error("empty");
+    $("title").textContent = routines.length === 1 ? T.one : T.many;
+    $("sub").textContent = T.sub;
+    for (const r of routines) {
+      const card = document.createElement("div");
+      card.className = "card";
+      const h = document.createElement("h2");
+      h.textContent = String(r.n || "").slice(0, 60);
+      card.appendChild(h);
+      for (const e of (r.e || []).slice(0, 30)) {
+        const row = document.createElement("div");
+        row.className = "row";
+        const name = document.createElement("span");
+        name.textContent = display(String(e.x || "")).slice(0, 80);
+        const b = document.createElement("b");
+        b.textContent = sets(e);
+        row.append(name, b);
+        card.appendChild(row);
+      }
+      $("list").appendChild(card);
+    }
+  } catch (err) {
+    $("title").textContent = L ? (lang === "fr" ? "Une routine pour toi" : T.one) : T.one;
+    $("sub").textContent = data ? T.sub : T.bad;
+  }
+})();
+</script>
+</body>
+</html>
