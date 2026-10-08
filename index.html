@@ -2,28 +2,438 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kayam</title>
-<meta name="description" content="Kayam : tes repas, tes séances, tes progrès.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kayam · Repas, séances, progrès</title>
+<meta name="description" content="Kayam : ton coach de poche. Tes repas, tes séances et tes progrès, au même endroit.">
+<meta name="theme-color" content="#070A08">
+<meta property="og:title" content="Kayam">
+<meta property="og:description" content="Tes repas. Tes séances. Tes progrès.">
+<meta property="og:image" content="https://kayamfit.com/img/workout.jpg">
+<link rel="icon" href="img/logo.png">
 <style>
-  :root { --cream:#F7F7F2; --dark:#1C261F; --sage:#737D73; --green:#5C8C33; --lime:#CCED78; }
-  @media (prefers-color-scheme: dark) { :root { --cream:#0E1310; --dark:#F1F4EC; --sage:#9AA59B; --green:#A9D86E; } }
+  :root {
+    --bg:#070A08; --bg2:#0D130F; --ink:#F2F5EE; --sage:#9AA59B; --lime:#CCED78; --green:#5C8C33; --deep:#1E3312;
+    --glass:rgba(255,255,255,.045); --line:rgba(255,255,255,.09);
+  }
   * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--cream); color:var(--dark);
-         font:17px/1.5 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; text-align:center; padding:24px 16px; }
-  h1 { font-size:56px; font-weight:800; margin:0; }
-  h1 span { color:var(--green); }
-  p { color:var(--sage); margin:8px 0 28px; }
-  a.button { display:inline-block; background:var(--lime); color:#1C261F; font-weight:700; text-decoration:none; padding:14px 22px; border-radius:16px; margin:6px; }
+  html { scroll-behavior:smooth; overflow-x:clip; }
+  body { margin:0; background:var(--bg); color:var(--ink); overflow-x:clip;
+         font:17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+         -webkit-font-smoothing:antialiased; }
+  a { color:inherit; }
+  img { display:block; max-width:100%; }
+
+  /* ---------- Fond : aurores, grille, grain ---------- */
+  .bg { position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none; }
+  .blob { position:absolute; border-radius:50%; filter:blur(90px); opacity:.55; mix-blend-mode:screen; animation:float 18s ease-in-out infinite alternate; }
+  .blob.a { width:56vmax; height:56vmax; left:-18vmax; top:-20vmax; background:radial-gradient(circle, #CCED78 0%, transparent 62%); opacity:.28; }
+  .blob.b { width:48vmax; height:48vmax; right:-16vmax; top:20vh; background:radial-gradient(circle, #3E7A2A 0%, transparent 65%); animation-duration:23s; }
+  .blob.c { width:40vmax; height:40vmax; left:20vw; bottom:-24vmax; background:radial-gradient(circle, #8FD14F 0%, transparent 62%); opacity:.22; animation-duration:27s; }
+  @keyframes float { to { transform:translate3d(6vmax, 4vmax, 0) scale(1.12); } }
+  .grid { position:fixed; inset:auto 0 0 0; height:55vh; z-index:-1; pointer-events:none;
+          background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+          background-size:64px 64px; transform:perspective(600px) rotateX(62deg); transform-origin:bottom;
+          mask-image:linear-gradient(to top, rgba(0,0,0,.7), transparent 85%); -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,.7), transparent 85%);
+          animation:gridmove 6s linear infinite; }
+  @keyframes gridmove { to { background-position:0 64px; } }
+  .grain { position:fixed; inset:-50%; z-index:-1; pointer-events:none; opacity:.06;
+           background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+           animation:grain 1.2s steps(6) infinite; }
+  @keyframes grain { 0%{transform:translate(0,0)} 20%{transform:translate(-3%,2%)} 40%{transform:translate(2%,-3%)} 60%{transform:translate(-2%,-1%)} 80%{transform:translate(3%,3%)} 100%{transform:translate(0,0)} }
+  .spot { position:fixed; width:520px; height:520px; border-radius:50%; pointer-events:none; z-index:-1; left:0; top:0;
+          background:radial-gradient(circle, rgba(204,237,120,.12), transparent 60%); transform:translate(-50%,-50%); transition:opacity .4s; }
+
+  /* ---------- Barre du haut ---------- */
+  nav { position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:10; display:flex; align-items:center; gap:22px;
+        padding:10px 12px 10px 18px; border-radius:999px; background:rgba(12,17,13,.55); border:1px solid var(--line);
+        backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); width:max-content; max-width:calc(100% - 32px); }
+  .brand { display:flex; align-items:center; gap:8px; font-weight:800; font-size:19px; letter-spacing:-.02em; text-decoration:none; }
+  .brand img { width:22px; height:22px; }
+  .brand span { color:var(--lime); }
+  nav .links { display:flex; gap:18px; font-size:14px; color:var(--sage); }
+  nav .links a { text-decoration:none; transition:color .2s; }
+  nav .links a:hover { color:var(--ink); }
+  .pill { font-size:13px; font-weight:700; padding:8px 14px; border-radius:999px; background:var(--lime); color:#0B110A; text-decoration:none; white-space:nowrap; }
+  @media (max-width:640px) { nav .links { display:none; } }
+
+  /* ---------- Hero ---------- */
+  .hero { overflow-x:clip; min-height:100svh; display:grid; grid-template-columns:1.05fr .95fr; align-items:center; gap:40px; max-width:1180px; margin:0 auto; padding:120px 24px 60px; }
+  .eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--lime);
+             padding:7px 12px; border:1px solid rgba(204,237,120,.3); border-radius:999px; background:rgba(204,237,120,.06); }
+  .eyebrow i { width:7px; height:7px; border-radius:50%; background:var(--lime); box-shadow:0 0 12px var(--lime); animation:pulse 1.8s infinite; }
+  @keyframes pulse { 50% { opacity:.3; } }
+  h1 { font-size:clamp(54px, 9vw, 112px); line-height:.92; letter-spacing:-.045em; margin:22px 0 18px; font-weight:800; }
+  h1 .word { display:inline-block; overflow:hidden; vertical-align:top; padding-bottom:.06em; }
+  h1 .ch { display:inline-block; transform:translateY(110%) rotate(8deg); opacity:0; filter:blur(8px);
+           animation:rise .9s cubic-bezier(.2,.9,.2,1) forwards; }
+  @keyframes rise { to { transform:none; opacity:1; filter:none; } }
+  h1 .accent .ch { color:var(--lime); }
+  .shine { background:linear-gradient(100deg, #F2F5EE 20%, #CCED78 40%, #F2F5EE 60%); background-size:220% 100%;
+           -webkit-background-clip:text; background-clip:text; color:transparent; animation:shine 5s linear infinite; }
+  @keyframes shine { to { background-position:-220% 0; } }
+  .lead { font-size:clamp(18px, 2.2vw, 22px); color:var(--sage); max-width:520px; margin:0 0 30px; }
+  .lead b { color:var(--ink); font-weight:600; }
+  .ctas { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+  .store { display:inline-flex; align-items:center; gap:10px; padding:13px 20px; border-radius:16px; background:var(--ink); color:#0B110A;
+           text-decoration:none; font-weight:700; position:relative; overflow:hidden; }
+  .store small { display:block; font-size:11px; font-weight:600; opacity:.6; line-height:1; }
+  .store::after { content:""; position:absolute; inset:0; background:linear-gradient(120deg, transparent 30%, rgba(204,237,120,.55) 50%, transparent 70%);
+                  transform:translateX(-120%); animation:sweep 3.2s ease-in-out infinite; }
+  @keyframes sweep { 60%,100% { transform:translateX(120%); } }
+  .ghost { padding:13px 18px; border-radius:16px; border:1px solid var(--line); text-decoration:none; font-weight:600; color:var(--ink); background:var(--glass); }
+
+  /* Les téléphones */
+  .stage { position:relative; height:640px; perspective:1400px; }
+  .phone { position:absolute; width:268px; aspect-ratio:414/900; border-radius:42px; padding:9px; background:linear-gradient(145deg, #2a332c, #0c100d);
+           box-shadow:0 40px 90px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08) inset, 0 0 60px rgba(204,237,120,.08);
+           transform-style:preserve-3d; transition:transform .25s ease-out; will-change:transform; }
+  .phone img { width:100%; height:100%; object-fit:cover; border-radius:34px; }
+  .phone::after { content:""; position:absolute; inset:9px; border-radius:34px; pointer-events:none;
+                  background:linear-gradient(115deg, rgba(255,255,255,.16) 0%, transparent 32%); }
+  .phone.p1 { left:50%; top:20px; margin-left:-134px; z-index:3; animation:bob 7s ease-in-out infinite; }
+  .phone.p2 { left:4%; top:110px; z-index:2; opacity:.85; scale:.86; animation:bob 8s ease-in-out -2s infinite; }
+  .phone.p3 { right:2%; top:120px; z-index:1; opacity:.8; scale:.84; animation:bob 9s ease-in-out -4s infinite; }
+  @keyframes bob { 50% { translate:0 -14px; } }
+  .halo { position:absolute; left:50%; top:52%; width:420px; height:420px; transform:translate(-50%,-50%); border-radius:50%;
+          background:conic-gradient(from 0deg, transparent, rgba(204,237,120,.35), transparent 40%); filter:blur(40px); animation:spin 9s linear infinite; }
+  @keyframes spin { to { transform:translate(-50%,-50%) rotate(360deg); } }
+  .chip { position:absolute; z-index:5; padding:10px 14px; border-radius:16px; font-size:14px; font-weight:700; white-space:nowrap;
+          background:rgba(14,20,15,.7); border:1px solid rgba(204,237,120,.3); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+          box-shadow:0 12px 30px rgba(0,0,0,.4); animation:bob 6s ease-in-out infinite; }
+  .chip em { font-style:normal; color:var(--lime); }
+  .chip.c1 { left:-2%; top:60px; }
+  .chip.c2 { right:-2%; top:330px; animation-delay:-2s; }
+  .chip.c3 { left:8%; bottom:40px; animation-delay:-4s; }
+
+  @media (max-width:900px) {
+    .hero { grid-template-columns:1fr; text-align:center; padding-top:110px; }
+    .lead { margin-left:auto; margin-right:auto; }
+    .ctas { justify-content:center; }
+    .stage { height:560px; }
+    .phone { width:230px; }
+    .phone.p1 { margin-left:-115px; }
+    .chip.c1 { left:0; } .chip.c2 { right:0; }
+  }
+  @media (max-width:520px) {
+    .phone.p2, .phone.p3 { display:none; }
+    .chip { font-size:12px; padding:8px 11px; }
+  }
+
+  /* ---------- Bandeau qui défile ---------- */
+  .ticker { border-block:1px solid var(--line); background:rgba(255,255,255,.02); overflow:hidden; padding:16px 0; }
+  .track { display:flex; gap:44px; width:max-content; animation:marquee 38s linear infinite; font-weight:700; font-size:15px; letter-spacing:.02em; color:var(--sage); }
+  .track span::before { content:"✦"; color:var(--lime); margin-right:44px; }
+  @keyframes marquee { to { transform:translateX(-50%); } }
+
+  /* ---------- Sections ---------- */
+  section { max-width:1180px; margin:0 auto; padding:110px 24px; }
+  .kicker { color:var(--lime); font-weight:700; font-size:13px; letter-spacing:.16em; text-transform:uppercase; }
+  h2 { font-size:clamp(36px, 5.4vw, 64px); line-height:1; letter-spacing:-.035em; margin:14px 0 18px; font-weight:800; }
+  h2 .dim { color:#5E6A60; }
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+  .split.rev .copy { order:2; }
+  .copy p { color:var(--sage); font-size:19px; max-width:500px; }
+  .points { list-style:none; padding:0; margin:26px 0 0; display:grid; gap:12px; }
+  .points li { display:flex; gap:12px; align-items:flex-start; color:var(--ink); font-weight:500; }
+  .points li::before { content:""; flex:none; width:22px; height:22px; margin-top:2px; border-radius:7px;
+                       background:var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%230B110A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat; }
+  .shot { position:relative; display:flex; justify-content:center; }
+  .shot .phone { position:relative; left:auto; top:auto; margin:0; width:300px; animation:none; }
+  .shot::before { content:""; position:absolute; width:380px; height:380px; top:50%; left:50%; transform:translate(-50%,-50%); border-radius:50%;
+                  background:radial-gradient(circle, rgba(204,237,120,.22), transparent 65%); filter:blur(30px); }
+  @media (max-width:900px) {
+    .split { grid-template-columns:1fr; gap:40px; text-align:center; }
+    .split.rev .copy { order:0; }
+    .copy p { margin-left:auto; margin-right:auto; }
+    .points { justify-items:center; }
+    .points li { text-align:left; }
+  }
+
+  /* Le coach : la bulle +2,5 kg animée */
+  .coach { display:inline-flex; align-items:center; gap:12px; margin-top:26px; padding:12px 16px 12px 12px; border-radius:18px;
+           background:rgba(204,237,120,.08); border:1px solid rgba(204,237,120,.25); }
+  .coach .up { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--lime); color:#0B110A; font-weight:900; }
+  .coach b { font-variant-numeric:tabular-nums; }
+  .coach small { display:block; color:var(--sage); font-size:13px; }
+
+  /* ---------- Grille de fonctionnalités ---------- */
+  .bento { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-top:44px; }
+  .card { position:relative; padding:26px; border-radius:26px; background:var(--glass); border:1px solid var(--line); overflow:hidden;
+          transition:transform .3s, border-color .3s; isolation:isolate; }
+  .card::before { content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px; z-index:-1;
+                  background:radial-gradient(400px circle at var(--mx,50%) var(--my,0%), rgba(204,237,120,.6), transparent 40%);
+                  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;
+                  opacity:0; transition:opacity .3s; }
+  .card:hover { transform:translateY(-4px); }
+  .card:hover::before { opacity:1; }
+  .card .ico { width:46px; height:46px; border-radius:14px; display:grid; place-items:center; font-size:22px; background:rgba(204,237,120,.12); margin-bottom:18px; }
+  .card h3 { margin:0 0 8px; font-size:20px; letter-spacing:-.01em; }
+  .card p { margin:0; color:var(--sage); font-size:15px; }
+  .card.wide { grid-column:span 2; }
+  .card.hi { background:linear-gradient(150deg, rgba(204,237,120,.16), rgba(255,255,255,.03)); }
+  @media (max-width:900px) { .bento { grid-template-columns:1fr; } .card.wide { grid-column:auto; } }
+
+  /* ---------- Confidentialité ---------- */
+  .privacy { text-align:center; }
+  .privacy h2 { max-width:820px; margin-left:auto; margin-right:auto; }
+  .privacy p { color:var(--sage); max-width:600px; margin:0 auto; font-size:19px; }
+  .badges { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:30px; }
+  .badges span { padding:10px 16px; border-radius:999px; border:1px solid var(--line); background:var(--glass); font-weight:600; font-size:15px; }
+
+  /* ---------- Fin ---------- */
+  .final { text-align:center; padding-bottom:80px; }
+  .final h2 { font-size:clamp(46px, 8vw, 96px); }
+  .final .ctas { justify-content:center; margin-top:28px; }
+  footer { border-top:1px solid var(--line); padding:30px 24px 50px; text-align:center; color:var(--sage); font-size:14px; }
+  footer a { text-decoration:none; margin:0 10px; }
+  footer a:hover { color:var(--ink); }
+
+  /* Apparition au défilement */
+  .reveal { opacity:0; transform:translateY(40px); filter:blur(6px); transition:opacity .9s cubic-bezier(.2,.9,.2,1), transform .9s cubic-bezier(.2,.9,.2,1), filter .9s; }
+  .reveal.in { opacity:1; transform:none; filter:none; }
+  .d1 { transition-delay:.08s; } .d2 { transition-delay:.16s; } .d3 { transition-delay:.24s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation:none !important; transition:none !important; }
+    .reveal, h1 .ch { opacity:1; transform:none; filter:none; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <h1>kayam<span>.</span></h1>
-  <p>Tes repas. Tes séances. Tes progrès.<br>Your meals. Your workouts. Your progress.</p>
-  <a class="button" href="privacy.html">Confidentialité</a>
-  <a class="button" href="privacy.html#en">Privacy</a>
-  <p style="margin-top:28px;font-size:14px">Contact : <a href="mailto:kayam.support@gmail.com" style="color:var(--green)">kayam.support@gmail.com</a></p>
-</main>
+<div class="bg"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
+<div class="grid"></div>
+<div class="grain"></div>
+<div class="spot" id="spot"></div>
+
+<nav>
+  <a class="brand" href="#top"><img src="img/logo.png" alt=""><b>kayam<span>.</span></b></a>
+  <div class="links">
+    <a href="#seance" data-i="nav1">Séances</a>
+    <a href="#repas" data-i="nav2">Repas</a>
+    <a href="#progres" data-i="nav3">Progrès</a>
+  </div>
+  <a class="pill" href="#fin" data-i="soon">Bientôt</a>
+</nav>
+
+<header class="hero" id="top">
+  <div>
+    <span class="eyebrow"><i></i><span data-i="eyebrow">Ton coach de poche</span></span>
+    <h1 id="title" aria-label="Mange. Soulève. Progresse."></h1>
+    <p class="lead" data-i="lead" data-html>Tes <b>repas</b>, tes <b>séances</b> et tes <b>progrès</b> au même endroit. Kayam te dit quoi manger, combien soulever, et ajuste tout au fil des semaines.</p>
+    <div class="ctas">
+      <a class="store" href="#fin"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4.1zM13.9 5c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>
+        <span><small data-i="soon2">Bientôt sur</small>App Store</span></a>
+      <a class="ghost" href="#seance" data-i="discover">Découvrir ↓</a>
+    </div>
+  </div>
+  <div class="stage" id="stage">
+    <div class="halo"></div>
+    <div class="phone p2" data-depth="0.6"><img src="img/meals.jpg" alt="Kayam : repas du jour"></div>
+    <div class="phone p3" data-depth="0.6"><img src="img/progress.jpg" alt="Kayam : progrès"></div>
+    <div class="phone p1" data-depth="1"><img src="img/workout.jpg" alt="Kayam : séance du jour"></div>
+    <div class="chip c1">↑ <em>+2,5 kg</em> <span data-i="chip1">aujourd'hui</span></div>
+    <div class="chip c2">🏆 <span data-i="chip2">Nouveau record</span></div>
+    <div class="chip c3">🔥 <em>157 g</em> <span data-i="chip3">de protéines</span></div>
+  </div>
+</header>
+
+<div class="ticker" aria-hidden="true"><div class="track" id="track"></div></div>
+
+<section id="seance">
+  <div class="split">
+    <div class="copy reveal">
+      <div class="kicker" data-i="k1">Séances</div>
+      <h2 data-i="h1" data-html>Il sait combien <span class="dim">ajouter.</span></h2>
+      <p data-i="p1">Toutes tes répétitions la dernière fois ? Kayam te propose le poids suivant. Bloqué trois fois ? Il allège pour mieux repartir. Comme un coach, à chaque série.</p>
+      <div class="coach"><span class="up">↑</span><div><b id="kg">80</b> <b>kg</b> → <b id="kg2">82,5 kg</b><small data-i="coach">Tu as fait toutes tes répétitions.</small></div></div>
+      <ul class="points">
+        <li data-i="s1">Minuteur de repos, records et trophées en direct</li>
+        <li data-i="s2">Sur l'écran verrouillé et la Dynamic Island</li>
+        <li data-i="s3">Pas le temps ? Une version courte qui garde l'essentiel</li>
+      </ul>
+    </div>
+    <div class="shot reveal d2"><div class="phone tilt"><img src="img/active.jpg" alt="Séance en cours dans Kayam" loading="lazy"></div></div>
+  </div>
+</section>
+
+<section id="repas">
+  <div class="split rev">
+    <div class="copy reveal">
+      <div class="kicker" data-i="k2">Repas</div>
+      <h2 data-i="h2" data-html>Manger juste, <span class="dim">sans compter.</span></h2>
+      <p data-i="p2">Ton objectif de calories et de protéines, calculé pour toi. Des repas simples, dosés à ta mesure, avec une vraie sauce, comptée elle aussi.</p>
+      <ul class="points">
+        <li data-i="m1">« Comme hier ? » : ta journée remplie en un appui</li>
+        <li data-i="m2">Scan des codes-barres et ta liste d'aliments</li>
+        <li data-i="m3">Sans lactose, végétarien, vegan : tes préférences d'abord</li>
+      </ul>
+    </div>
+    <div class="shot reveal d2"><div class="phone tilt"><img src="img/meals.jpg" alt="Les repas du jour dans Kayam" loading="lazy"></div></div>
+  </div>
+</section>
+
+<section id="progres">
+  <div class="split">
+    <div class="copy reveal">
+      <div class="kicker" data-i="k3">Progrès</div>
+      <h2 data-i="h3" data-html>Ta progression, <span class="dim">en images.</span></h2>
+      <p data-i="p3">Chaque séance devient une publication privée : tes photos, tes chiffres, tes records. Et chaque dimanche, le bilan de ta semaine.</p>
+      <ul class="points">
+        <li data-i="g1">Photos avant / après côte à côte</li>
+        <li data-i="g2">Records et muscles travaillés, semaine par semaine</li>
+        <li data-i="g3">Un petit cercle d'amis pour se motiver 👊</li>
+      </ul>
+    </div>
+    <div class="shot reveal d2"><div class="phone tilt"><img src="img/progress.jpg" alt="Les progrès dans Kayam" loading="lazy"></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="reveal" style="text-align:center">
+    <div class="kicker" data-i="k4">Et aussi</div>
+    <h2 data-i="h4" data-html>Pensé pour <span class="dim">tenir dans le temps.</span></h2>
+  </div>
+  <div class="bento">
+    <div class="card wide hi reveal"><div class="ico">✨</div><h3 data-i="b1t">Crée ton programme</h3><p data-i="b1p">Tes jours, ton temps, les muscles que tu veux développer le plus. Kayam construit la semaine, puis l'ajuste quand tu progresses ou que tu bloques.</p></div>
+    <div class="card reveal d1"><div class="ico">🔗</div><h3 data-i="b2t">Partage tes routines</h3><p data-i="b2p">Un lien, et ton ami a ta routine. Jamais tes poids.</p></div>
+    <div class="card reveal"><div class="ico">💊</div><h3 data-i="b3t">Rappels utiles</h3><p data-i="b3p">Compléments, pesée, protéines du soir. Jamais trop.</p></div>
+    <div class="card reveal d1"><div class="ico">🧘</div><h3 data-i="b4t">Muscu, cardio, Pilates</h3><p data-i="b4p">Photos, conseils et une image mentale pour chaque exercice.</p></div>
+    <div class="card reveal d2"><div class="ico">📥</div><h3 data-i="b5t">Viens de Hevy ?</h3><p data-i="b5p">Importe tout ton historique en une fois.</p></div>
+  </div>
+</section>
+
+<section class="privacy">
+  <div class="reveal">
+    <div class="kicker" data-i="k5">Confidentialité</div>
+    <h2 data-i="h5" data-html>Tes données <span class="dim">restent à toi.</span></h2>
+    <p data-i="p5">Tes photos de progrès sont privées. Pas de publicité, pas de revente de données. Sans compte, tout reste sur ton iPhone.</p>
+    <div class="badges"><span data-i="t1">🔒 Photos privées</span><span data-i="t2">🚫 Zéro pub</span><span data-i="t3">📱 Fonctionne hors ligne</span></div>
+  </div>
+</section>
+
+<section class="final" id="fin">
+  <div class="reveal">
+    <h2 class="shine" data-i="h6">Bientôt sur l'App Store.</h2>
+    <p class="lead" style="margin:0 auto" data-i="p6">Kayam arrive sur iPhone. Une question ? Écris-nous.</p>
+    <div class="ctas"><a class="ghost" href="mailto:kayam.support@gmail.com">kayam.support@gmail.com</a></div>
+  </div>
+</section>
+
+<footer>
+  <a href="privacy.html" data-i="f1">Confidentialité</a>
+  <a href="privacy.html#en">Privacy</a>
+  <a href="mailto:kayam.support@gmail.com" data-i="f2">Contact</a>
+  <div style="margin-top:14px">© <span id="year"></span> Kayam</div>
+</footer>
+
+<script>
+// ---------- Langue : français par défaut, anglais sinon ----------
+const EN = {
+  nav1:"Workouts", nav2:"Meals", nav3:"Progress", soon:"Coming soon", eyebrow:"Your pocket coach",
+  lead:"Your <b>meals</b>, your <b>workouts</b> and your <b>progress</b> in one place. Kayam tells you what to eat, how much to lift, and adjusts everything week after week.",
+  soon2:"Coming soon on", discover:"Discover ↓", chip1:"today", chip2:"New record", chip3:"of protein",
+  k1:"Workouts", h1:"It knows how much <span class=\"dim\">to add.</span>",
+  p1:"Hit all your reps last time? Kayam suggests the next weight. Stuck three times? It goes lighter so you bounce back. Like a coach, every set.",
+  coach:"You did all your reps.", s1:"Rest timer, records and trophies, live", s2:"On the Lock Screen and in the Dynamic Island", s3:"No time? A short version that keeps what matters",
+  k2:"Meals", h2:"Eat right, <span class=\"dim\">without counting.</span>",
+  p2:"Your calorie and protein target, calculated for you. Simple meals sized for you, with a real sauce, counted too.",
+  m1:"\"Same as yesterday?\": your day filled in one tap", m2:"Barcode scan and your own food list", m3:"Dairy-free, vegetarian, vegan: your preferences first",
+  k3:"Progress", h3:"Your progress, <span class=\"dim\">in pictures.</span>",
+  p3:"Every workout becomes a private post: your photos, your numbers, your records. And every Sunday, your week in review.",
+  g1:"Before / after photos side by side", g2:"Records and muscles trained, week by week", g3:"A small circle of friends to stay motivated 👊",
+  k4:"And more", h4:"Built to <span class=\"dim\">last.</span>",
+  b1t:"Build your program", b1p:"Your days, your time, the muscles you want to grow most. Kayam builds the week, then adjusts it when you progress or get stuck.",
+  b2t:"Share your routines", b2p:"One link, and your friend has your routine. Never your weights.",
+  b3t:"Useful reminders", b3p:"Supplements, weigh-ins, evening protein. Never too many.",
+  b4t:"Lifting, cardio, Pilates", b4p:"Photos, tips and a mental image for every exercise.",
+  b5t:"Coming from Hevy?", b5p:"Import your whole history at once.",
+  k5:"Privacy", h5:"Your data <span class=\"dim\">stays yours.</span>",
+  p5:"Your progress photos are private. No ads, no data selling. Without an account, everything stays on your iPhone.",
+  t1:"🔒 Private photos", t2:"🚫 No ads", t3:"📱 Works offline",
+  h6:"Coming soon to the App Store.", p6:"Kayam is coming to iPhone. A question? Write to us.", f1:"Privacy", f2:"Contact"
+};
+const lang = (navigator.language || "fr").slice(0, 2);
+const words = lang === "fr" ? ["Mange.", "Soulève.", "Progresse."] : ["Eat.", "Lift.", "Progress."];
+if (lang !== "fr") {
+  document.documentElement.lang = "en";
+  document.title = "Kayam · Meals, workouts, progress";
+  document.querySelectorAll("[data-i]").forEach(el => {
+    const t = EN[el.dataset.i]; if (!t) return;
+    if (el.hasAttribute("data-html")) el.innerHTML = t; else el.textContent = t;
+  });
+  document.getElementById("title").setAttribute("aria-label", words.join(" "));
+}
+
+// ---------- Titre : les lettres arrivent une par une ----------
+const title = document.getElementById("title");
+let delay = 0.15;
+words.forEach((w, wi) => {
+  const word = document.createElement("span");
+  word.className = "word" + (wi === 2 ? " accent" : "");
+  [...w].forEach(c => {
+    const ch = document.createElement("span");
+    ch.className = "ch"; ch.textContent = c; ch.style.animationDelay = delay.toFixed(2) + "s";
+    delay += 0.035; word.appendChild(ch);
+  });
+  title.appendChild(word);
+  if (wi < words.length - 1) { title.appendChild(document.createElement("br")); delay += 0.12; }
+});
+
+// ---------- Bandeau qui défile ----------
+const items = lang === "fr"
+  ? ["Plan repas", "Coach de progression", "Sauces comptées", "Records", "Live Activity", "Partage de routines", "Pilates", "Bilan du dimanche", "Scan code-barres", "Avant / après", "Version courte", "Import Hevy"]
+  : ["Meal plan", "Progression coach", "Counted sauces", "Records", "Live Activity", "Routine sharing", "Pilates", "Sunday review", "Barcode scan", "Before / after", "Short version", "Hevy import"];
+const track = document.getElementById("track");
+track.innerHTML = [...items, ...items].map(t => `<span>${t}</span>`).join("");
+
+// ---------- Apparition au défilement ----------
+const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .18 });
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+// ---------- La bulle du coach : 80 → 82,5 kg ----------
+const kg = document.getElementById("kg");
+new IntersectionObserver((entries, obs) => entries.forEach(e => {
+  if (!e.isIntersecting) return; obs.disconnect();
+  let v = 72.5; const t = setInterval(() => { v += 2.5; kg.textContent = String(v).replace(".", ","); if (v >= 80) clearInterval(t); }, 140);
+}), { threshold: 1 }).observe(kg);
+
+// ---------- Effets à la souris : halo, téléphones en 3D, bordures des cartes ----------
+const fine = matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+const spot = document.getElementById("spot");
+if (!fine) spot.style.opacity = 0;
+const stage = document.getElementById("stage");
+addEventListener("pointermove", e => {
+  if (!fine) return;
+  spot.style.left = e.clientX + "px"; spot.style.top = e.clientY + "px";
+  const r = stage.getBoundingClientRect();
+  const x = (e.clientX - (r.left + r.width / 2)) / innerWidth, y = (e.clientY - (r.top + r.height / 2)) / innerHeight;
+  stage.querySelectorAll(".phone").forEach(p => {
+    const d = +p.dataset.depth || 1;
+    p.style.transform = `rotateY(${x * 22 * d}deg) rotateX(${-y * 16 * d}deg) translateZ(${d * 20}px)`;
+  });
+});
+document.querySelectorAll(".tilt").forEach(p => {
+  p.addEventListener("pointermove", e => {
+    if (!fine) return;
+    const r = p.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    p.style.transform = `rotateY(${x * 18}deg) rotateX(${-y * 14}deg) scale(1.03)`;
+  });
+  p.addEventListener("pointerleave", () => p.style.transform = "");
+});
+document.querySelectorAll(".card").forEach(c => c.addEventListener("pointermove", e => {
+  const r = c.getBoundingClientRect();
+  c.style.setProperty("--mx", (e.clientX - r.left) + "px"); c.style.setProperty("--my", (e.clientY - r.top) + "px");
+}));
+
+// Au défilement, les téléphones du haut s'écartent un peu
+addEventListener("scroll", () => {
+  const s = Math.min(scrollY / 600, 1);
+  const p2 = document.querySelector(".phone.p2"), p3 = document.querySelector(".phone.p3");
+  p2.style.marginLeft = `${-s * 40}px`; p2.style.marginTop = `${s * 30}px`;
+  p3.style.marginRight = `${-s * 40}px`; p3.style.marginTop = `${s * 30}px`;
+}, { passive: true });
+
+document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
