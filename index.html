@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#070A08">
 <meta property="og:title" content="Kayam">
 <meta property="og:description" content="Tes repas. Tes séances. Tes progrès.">
-<meta property="og:image" content="https://kayamfit.com/img/workout.jpg">
+<meta property="og:image" content="https://kayamfit.com/img/gym-poster.jpg">
 <link rel="icon" href="img/logo.png">
 <style>
   :root {
@@ -72,6 +72,27 @@
     .tag.t1 { left:4px; } .tag.t2 { right:4px; }
   }
   @media (max-width:520px) { .food.f1 { left:-10px; } .food.f2 { right:-14px; } }
+
+  /* ---------- Version teaser (avant la sortie) ---------- */
+  .teaser { text-align:center; padding-top:150px; padding-bottom:150px; }
+  .teaser h2 { font-size:clamp(42px, 7vw, 84px); max-width:900px; margin-left:auto; margin-right:auto; }
+  .teaser p { color:var(--sage); font-size:20px; max-width:560px; margin:0 auto; }
+  .shot.nophone { height:460px; }
+  .shot.nophone .food.f1 { width:300px; height:300px; left:4%; top:10px; }
+  .shot.nophone .food.f2 { width:260px; height:320px; right:4%; top:110px; }
+  .shot.nophone .food.f3 { width:170px; height:170px; left:28%; bottom:0; }
+  @media (max-width:900px) {
+    .shot.nophone { height:380px; }
+    .shot.nophone .food.f1 { width:190px; height:190px; } .shot.nophone .food.f2 { width:170px; height:220px; top:70px; }
+    .shot.nophone .food.f3 { width:120px; height:120px; left:22%; }
+  }
+  /* Les écrans de l'app : on devine, on ne voit pas tout */
+  .stage .phone img { filter:brightness(.8); }
+  .stage .phone.p1::before { content:""; position:absolute; inset:9px; border-radius:34px; z-index:1;
+     background:radial-gradient(circle at 50% 45%, rgba(204,237,120,.18), transparent 60%); }
+  .lock { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); z-index:6; text-align:center; pointer-events:none; }
+  .lock b { display:block; font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .lock span { font-size:13px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--lime); }
 
   /* ---------- Barre du haut ---------- */
   nav { position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:10; display:flex; align-items:center; gap:22px;
@@ -179,13 +200,6 @@
     .points li { text-align:left; }
   }
 
-  /* Le coach : la bulle +2,5 kg animée */
-  .coach { display:inline-flex; align-items:center; gap:12px; margin-top:26px; padding:12px 16px 12px 12px; border-radius:18px;
-           background:rgba(204,237,120,.08); border:1px solid rgba(204,237,120,.25); }
-  .coach .up { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--lime); color:#0B110A; font-weight:900; }
-  .coach b { font-variant-numeric:tabular-nums; }
-  .coach small { display:block; color:var(--sage); font-size:13px; }
-
   /* ---------- Grille de fonctionnalités ---------- */
   .bento { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-top:44px; }
   .card { position:relative; padding:26px; border-radius:26px; background:var(--glass); border:1px solid var(--line); overflow:hidden;
@@ -253,7 +267,7 @@
   <div>
     <span class="eyebrow"><i></i><span data-i="eyebrow">Ton coach de poche</span></span>
     <h1 id="title" aria-label="Mange. Soulève. Progresse."></h1>
-    <p class="lead" data-i="lead" data-html>Tes <b>repas</b>, tes <b>séances</b> et tes <b>progrès</b> au même endroit. Kayam te dit quoi manger, combien soulever, et ajuste tout au fil des semaines.</p>
+    <p class="lead" data-i="lead" data-html>Tes <b>repas</b>, tes <b>séances</b> et tes <b>progrès</b>, enfin réunis. Une app pensée pour que tu tiennes, pour de bon.</p>
     <div class="ctas">
       <a class="store" href="#fin"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4.1zM13.9 5c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>
         <span><small data-i="soon2">Bientôt sur</small>App Store</span></a>
@@ -262,31 +276,23 @@
   </div>
   <div class="stage" id="stage">
     <div class="halo"></div>
-    <div class="phone p2" data-depth="0.6"><img src="img/meals.jpg" alt="Kayam : repas du jour"></div>
-    <div class="phone p3" data-depth="0.6"><img src="img/progress.jpg" alt="Kayam : progrès"></div>
-    <div class="phone p1" data-depth="1"><img src="img/workout.jpg" alt="Kayam : séance du jour"></div>
-    <div class="chip c1">↑ <em>+2,5 kg</em> <span data-i="chip1">aujourd'hui</span></div>
+    <div class="phone p2" data-depth="0.6"><img src="img/teaser-meals.jpg" alt=""></div>
+    <div class="phone p3" data-depth="0.6"><img src="img/teaser-progress.jpg" alt=""></div>
+    <div class="phone p1" data-depth="1"><img src="img/teaser-workout.jpg" alt=""></div>
+    <div class="lock"><span data-i="lock">Bientôt</span><b>kayam.</b></div>
+    <div class="chip c1">💪 <span data-i="chip1">Plus fort</span></div>
     <div class="chip c2">🏆 <span data-i="chip2">Nouveau record</span></div>
-    <div class="chip c3">🔥 <em>157 g</em> <span data-i="chip3">de protéines</span></div>
+    <div class="chip c3">🍽️ <span data-i="chip3">Mieux manger</span></div>
   </div>
 </header>
 
 <div class="ticker" aria-hidden="true"><div class="track" id="track"></div></div>
 
-<div class="band"><section id="seance">
-  <div class="split">
-    <div class="copy reveal">
-      <div class="kicker" data-i="k1">Séances</div>
-      <h2 data-i="h1" data-html>Il sait combien <span class="dim">ajouter.</span></h2>
-      <p data-i="p1">Toutes tes répétitions la dernière fois ? Kayam te propose le poids suivant. Bloqué trois fois ? Il allège pour mieux repartir. Comme un coach, à chaque série.</p>
-      <div class="coach"><span class="up">↑</span><div><b id="kg">80</b> <b>kg</b> → <b id="kg2">82,5 kg</b><small data-i="coach">Tu as fait toutes tes répétitions.</small></div></div>
-      <ul class="points">
-        <li data-i="s1">Minuteur de repos, records et trophées en direct</li>
-        <li data-i="s2">Sur l'écran verrouillé et la Dynamic Island</li>
-        <li data-i="s3">Pas le temps ? Une version courte qui garde l'essentiel</li>
-      </ul>
-    </div>
-    <div class="shot reveal d2"><div class="phone tilt"><img src="img/active.jpg" alt="Séance en cours dans Kayam" loading="lazy"></div></div>
+<div class="band"><section id="seance" class="teaser">
+  <div class="reveal">
+    <div class="kicker" data-i="k1">Séances</div>
+    <h2 data-i="h1" data-html>Un coach qui te <span class="dim">fait avancer.</span></h2>
+    <p data-i="p1">Chaque séance compte. Kayam t'accompagne pour que tu progresses vraiment, semaine après semaine.</p>
   </div>
 </section></div>
 
@@ -294,52 +300,22 @@
   <div class="split rev">
     <div class="copy reveal">
       <div class="kicker" data-i="k2">Repas</div>
-      <h2 data-i="h2" data-html>Manger juste, <span class="dim">sans compter.</span></h2>
-      <p data-i="p2">Ton objectif de calories et de protéines, calculé pour toi. Des repas simples, dosés à ta mesure, avec une vraie sauce, comptée elle aussi.</p>
-      <ul class="points">
-        <li data-i="m1">« Comme hier ? » : ta journée remplie en un appui</li>
-        <li data-i="m2">Scan des codes-barres et ta liste d'aliments</li>
-        <li data-i="m3">Sans lactose, végétarien, vegan : tes préférences d'abord</li>
-      </ul>
+      <h2 data-i="h2" data-html>Bien manger, <span class="dim">sans prise de tête.</span></h2>
+      <p data-i="p2">Des repas simples, bons et adaptés à ton objectif. Tu manges, Kayam s'occupe du reste.</p>
     </div>
-    <div class="shot withfood reveal d2" id="foodshot">
-      <img class="food f1" src="img/food-salmon.jpg" alt="Saumon, riz et brocoli" loading="lazy">
-      <img class="food f2" src="img/food-sauce.jpg" alt="Saumon laqué au citron vert" loading="lazy">
-      <img class="food f3" src="img/food-berries.jpg" alt="Fruits rouges" loading="lazy">
-      <div class="phone tilt"><img src="img/meals.jpg" alt="Les repas du jour dans Kayam" loading="lazy"></div>
-      <div class="tag t1">🥣 <em>623 kcal</em> · 40 g <span data-i="prot">prot.</span></div>
-      <div class="tag t2">💧 <span data-i="sauce">Sauce soja-gingembre</span></div>
+    <div class="shot withfood nophone reveal d2" id="foodshot">
+      <img class="food f1" src="img/food-salmon.jpg" alt="" loading="lazy">
+      <img class="food f2" src="img/food-sauce.jpg" alt="" loading="lazy">
+      <img class="food f3" src="img/food-berries.jpg" alt="" loading="lazy">
     </div>
   </div>
 </section>
 
-<section id="progres">
-  <div class="split">
-    <div class="copy reveal">
-      <div class="kicker" data-i="k3">Progrès</div>
-      <h2 data-i="h3" data-html>Ta progression, <span class="dim">en images.</span></h2>
-      <p data-i="p3">Chaque séance devient une publication privée : tes photos, tes chiffres, tes records. Et chaque dimanche, le bilan de ta semaine.</p>
-      <ul class="points">
-        <li data-i="g1">Photos avant / après côte à côte</li>
-        <li data-i="g2">Records et muscles travaillés, semaine par semaine</li>
-        <li data-i="g3">Un petit cercle d'amis pour se motiver 👊</li>
-      </ul>
-    </div>
-    <div class="shot reveal d2"><div class="phone tilt"><img src="img/progress.jpg" alt="Les progrès dans Kayam" loading="lazy"></div></div>
-  </div>
-</section>
-
-<section>
-  <div class="reveal" style="text-align:center">
-    <div class="kicker" data-i="k4">Et aussi</div>
-    <h2 data-i="h4" data-html>Pensé pour <span class="dim">tenir dans le temps.</span></h2>
-  </div>
-  <div class="bento">
-    <div class="card wide hi reveal"><div class="ico">✨</div><h3 data-i="b1t">Crée ton programme</h3><p data-i="b1p">Tes jours, ton temps, les muscles que tu veux développer le plus. Kayam construit la semaine, puis l'ajuste quand tu progresses ou que tu bloques.</p></div>
-    <div class="card reveal d1"><div class="ico">🔗</div><h3 data-i="b2t">Partage tes routines</h3><p data-i="b2p">Un lien, et ton ami a ta routine. Jamais tes poids.</p></div>
-    <div class="card reveal"><div class="ico">💊</div><h3 data-i="b3t">Rappels utiles</h3><p data-i="b3p">Compléments, pesée, protéines du soir. Jamais trop.</p></div>
-    <div class="card reveal d1"><div class="ico">🧘</div><h3 data-i="b4t">Muscu, cardio, Pilates</h3><p data-i="b4p">Photos, conseils et une image mentale pour chaque exercice.</p></div>
-    <div class="card reveal d2"><div class="ico">📥</div><h3 data-i="b5t">Viens de Hevy ?</h3><p data-i="b5p">Importe tout ton historique en une fois.</p></div>
+<section id="progres" class="teaser">
+  <div class="reveal">
+    <div class="kicker" data-i="k3">Progrès</div>
+    <h2 data-i="h3" data-html>Vois-toi <span class="dim">changer.</span></h2>
+    <p data-i="p3">Tes efforts, enfin visibles. Pour rester motivé quand ça compte le plus.</p>
   </div>
 </section>
 
@@ -347,8 +323,8 @@
   <div class="reveal">
     <div class="kicker" data-i="k5">Confidentialité</div>
     <h2 data-i="h5" data-html>Tes données <span class="dim">restent à toi.</span></h2>
-    <p data-i="p5">Tes photos de progrès sont privées. Pas de publicité, pas de revente de données. Sans compte, tout reste sur ton iPhone.</p>
-    <div class="badges"><span data-i="t1">🔒 Photos privées</span><span data-i="t2">🚫 Zéro pub</span><span data-i="t3">📱 Fonctionne hors ligne</span></div>
+    <p data-i="p5">Tes photos et tes données sont privées. Pas de publicité, pas de revente de données.</p>
+    <div class="badges"><span data-i="t1">🔒 Données privées</span><span data-i="t2">🚫 Zéro pub</span></div>
   </div>
 </section>
 
@@ -372,28 +348,15 @@
 // ---------- Langue : français par défaut, anglais sinon ----------
 const EN = {
   nav1:"Workouts", nav2:"Meals", nav3:"Progress", soon:"Coming soon", eyebrow:"Your pocket coach",
-  lead:"Your <b>meals</b>, your <b>workouts</b> and your <b>progress</b> in one place. Kayam tells you what to eat, how much to lift, and adjusts everything week after week.",
-  soon2:"Coming soon on", discover:"Discover ↓", chip1:"today", chip2:"New record", chip3:"of protein",
-  k1:"Workouts", h1:"It knows how much <span class=\"dim\">to add.</span>",
-  p1:"Hit all your reps last time? Kayam suggests the next weight. Stuck three times? It goes lighter so you bounce back. Like a coach, every set.",
-  coach:"You did all your reps.", s1:"Rest timer, records and trophies, live", s2:"On the Lock Screen and in the Dynamic Island", s3:"No time? A short version that keeps what matters",
-  k2:"Meals", h2:"Eat right, <span class=\"dim\">without counting.</span>",
-  p2:"Your calorie and protein target, calculated for you. Simple meals sized for you, with a real sauce, counted too.",
-  m1:"\"Same as yesterday?\": your day filled in one tap", m2:"Barcode scan and your own food list", m3:"Dairy-free, vegetarian, vegan: your preferences first",
-  k3:"Progress", h3:"Your progress, <span class=\"dim\">in pictures.</span>",
-  p3:"Every workout becomes a private post: your photos, your numbers, your records. And every Sunday, your week in review.",
-  g1:"Before / after photos side by side", g2:"Records and muscles trained, week by week", g3:"A small circle of friends to stay motivated 👊",
-  k4:"And more", h4:"Built to <span class=\"dim\">last.</span>",
-  b1t:"Build your program", b1p:"Your days, your time, the muscles you want to grow most. Kayam builds the week, then adjusts it when you progress or get stuck.",
-  b2t:"Share your routines", b2p:"One link, and your friend has your routine. Never your weights.",
-  b3t:"Useful reminders", b3p:"Supplements, weigh-ins, evening protein. Never too many.",
-  b4t:"Lifting, cardio, Pilates", b4p:"Photos, tips and a mental image for every exercise.",
-  b5t:"Coming from Hevy?", b5p:"Import your whole history at once.",
-  k5:"Privacy", h5:"Your data <span class=\"dim\">stays yours.</span>",
-  p5:"Your progress photos are private. No ads, no data selling. Without an account, everything stays on your iPhone.",
-  t1:"🔒 Private photos", t2:"🚫 No ads", t3:"📱 Works offline",
-  prot:"prot.", sauce:"Soy-ginger sauce", credits:"Photos", video:"Video",
-  h6:"Coming soon to the App Store.", p6:"Kayam is coming to iPhone. A question? Write to us.", f1:"Privacy", f2:"Contact"
+  lead:"Your <b>meals</b>, your <b>workouts</b> and your <b>progress</b>, finally together. An app built to help you stick with it, for good.",
+  soon2:"Coming soon on", discover:"Discover ↓", lock:"Coming soon", chip1:"Stronger", chip2:"New record", chip3:"Eat better",
+  k1:"Workouts", h1:"A coach that <span class=\"dim\">moves you forward.</span>", p1:"Every workout counts. Kayam helps you really progress, week after week.",
+  k2:"Meals", h2:"Eat well, <span class=\"dim\">without the hassle.</span>", p2:"Simple, tasty meals that fit your goal. You eat, Kayam handles the rest.",
+  k3:"Progress", h3:"Watch yourself <span class=\"dim\">change.</span>", p3:"Your efforts, finally visible. To stay motivated when it matters most.",
+  k5:"Privacy", h5:"Your data <span class=\"dim\">stays yours.</span>", p5:"Your photos and data are private. No ads, no data selling.",
+  t1:"🔒 Private data", t2:"🚫 No ads",
+  h6:"Coming soon to the App Store.", p6:"Kayam is coming to iPhone. A question? Write to us.", f1:"Privacy", f2:"Contact",
+  credits:"Photos", video:"Video"
 };
 const lang = (navigator.language || "fr").slice(0, 2);
 const words = lang === "fr" ? ["Mange.", "Soulève.", "Progresse."] : ["Eat.", "Lift.", "Progress."];
@@ -424,21 +387,14 @@ words.forEach((w, wi) => {
 
 // ---------- Bandeau qui défile ----------
 const items = lang === "fr"
-  ? ["Plan repas", "Coach de progression", "Sauces comptées", "Records", "Live Activity", "Partage de routines", "Pilates", "Bilan du dimanche", "Scan code-barres", "Avant / après", "Version courte", "Import Hevy"]
-  : ["Meal plan", "Progression coach", "Counted sauces", "Records", "Live Activity", "Routine sharing", "Pilates", "Sunday review", "Barcode scan", "Before / after", "Short version", "Hevy import"];
+  ? ["Repas", "Séances", "Progrès", "Motivation", "Simplicité", "Régularité", "Bientôt sur iPhone"]
+  : ["Meals", "Workouts", "Progress", "Motivation", "Simplicity", "Consistency", "Coming soon to iPhone"];
 const track = document.getElementById("track");
 track.innerHTML = [...items, ...items].map(t => `<span>${t}</span>`).join("");
 
 // ---------- Apparition au défilement ----------
 const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .18 });
 document.querySelectorAll(".reveal").forEach(el => io.observe(el));
-
-// ---------- La bulle du coach : 80 → 82,5 kg ----------
-const kg = document.getElementById("kg");
-new IntersectionObserver((entries, obs) => entries.forEach(e => {
-  if (!e.isIntersecting) return; obs.disconnect();
-  let v = 72.5; const t = setInterval(() => { v += 2.5; kg.textContent = String(v).replace(".", ","); if (v >= 80) clearInterval(t); }, 140);
-}), { threshold: 1 }).observe(kg);
 
 // ---------- Effets à la souris : halo, téléphones en 3D, bordures des cartes ----------
 const fine = matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches;
