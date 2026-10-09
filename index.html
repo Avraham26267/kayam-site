@@ -162,6 +162,25 @@
            transition:background .3s, color .3s; }
   .ghost:hover { background:var(--dark); color:var(--cream); }
 
+  /* Préviens-moi : la liste d'attente */
+  .wait { display:flex; gap:8px; max-width:520px; margin:0 auto; padding:6px; border-radius:999px; background:#fff;
+          border:1.5px solid var(--dark); }
+  .wait input[type=email] { flex:1; min-width:0; border:0; outline:0; background:transparent; font:inherit; font-size:17px;
+                            padding:0 18px; color:var(--dark); }
+  .wait button { border:0; cursor:pointer; font:inherit; font-weight:800; font-size:16px; padding:15px 24px; border-radius:999px;
+                 background:var(--dark); color:var(--lime); white-space:nowrap; transition:transform .2s; }
+  .wait button:active { transform:scale(.97); }
+  .wait button:disabled { opacity:.6; cursor:default; }
+  .wait .hp { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+  .wmsg { min-height:24px; margin:14px auto 0; font-size:15px; font-weight:700; }
+  .wmsg.ok { color:var(--green); } .wmsg.err { color:#B3261E; }
+  .wsmall { font-size:13px; color:var(--sage); margin-top:6px; }
+  .wsmall a { color:inherit; }
+  .final .contact { margin-top:34px; font-size:15px; color:var(--sage); }
+  .final .contact a { color:var(--dark); font-weight:700; }
+  @media (max-width:520px) { .wait { flex-direction:column; border-radius:24px; } .wait input[type=email] { padding:14px 14px; }
+                             .wait button { width:100%; } }
+
   /* Le grand nom en bas de page */
   footer { background:var(--dark); color:#A3ADA4; font-size:14px; overflow:hidden; padding-top:40px; }
   footer .row { display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:space-between; }
@@ -291,8 +310,17 @@
 <section class="final" id="fin">
   <div class="wrap reveal">
     <h2 data-i="h6" data-html>Bientôt sur <span class="mark">l'App&nbsp;Store.</span></h2>
-    <p data-i="p6">Tes données restent à toi : pas de pub, pas de revente. Une question ? Écris-nous.</p>
-    <a class="ghost mag" href="mailto:kayam.support@gmail.com">kayam.support@gmail.com</a>
+    <p data-i="p6">Laisse ton e-mail : on te prévient le jour du lancement. Un seul message, rien d'autre.</p>
+    <form class="wait" id="wait" novalidate>
+      <label for="wemail" class="hp" data-i="wlabel">Ton adresse e-mail</label>
+      <input type="email" id="wemail" name="email" autocomplete="email" inputmode="email" required
+             placeholder="ton@email.com" data-i="wph" data-attr="placeholder">
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" id="wbtn" data-i="wbtn">Préviens-moi</button>
+    </form>
+    <p class="wmsg" id="wmsg" role="status" aria-live="polite"></p>
+    <p class="wsmall"><span data-i="wsmall">Pas de pub, pas de revente.</span> <a href="privacy.html" data-i="f1">Confidentialité</a></p>
+    <p class="contact"><span data-i="ask">Une question ?</span> <a href="mailto:kayam.support@gmail.com">kayam.support@gmail.com</a></p>
   </div>
 </section>
 
@@ -324,7 +352,8 @@ const EN = {
   why:"Why Kayam",
   quote:"<p>I had one app for my workouts, another for my meals, and notes everywhere. At the gym, I'd end up on my messages instead of my next set.</p><p>So I built the app I wanted: one place, simple, that tells you what to do next.</p>",
   sign:"— Kayam's founder",
-  h6:"Coming soon to <span class=\"mark\">the App&nbsp;Store.</span>", p6:"Your data stays yours: no ads, no data selling. A question? Write to us.",
+  h6:"Coming soon to <span class=\"mark\">the App&nbsp;Store.</span>", p6:"Leave your email: we'll tell you on launch day. One message, nothing else.",
+  wlabel:"Your email address", wph:"you@email.com", wbtn:"Notify me", wsmall:"No ads, no data selling.", ask:"A question?",
   f1:"Privacy", f2:"Contact", credits:"Photos", video:"Video"
 };
 const fr = (navigator.language || "fr").slice(0, 2) === "fr";
@@ -335,7 +364,8 @@ if (!fr) {
   ["Eat.", "Lift.", "Progress."].forEach((w, i) => k[i].textContent = w);
   document.querySelectorAll("[data-i]").forEach(el => {
     const t = EN[el.dataset.i]; if (!t) return;
-    if (el.hasAttribute("data-html")) el.innerHTML = t; else el.textContent = t;
+    if (el.dataset.attr) el.setAttribute(el.dataset.attr, t);
+    else if (el.hasAttribute("data-html")) el.innerHTML = t; else el.textContent = t;
   });
 }
 
@@ -500,6 +530,35 @@ if (fine) {
 }
 
 $("year").textContent = new Date().getFullYear();
+
+// ---------- Préviens-moi : ajoute l'e-mail à la liste d'attente (Supabase, fonction join_waitlist) ----------
+(() => {
+  const form = $("wait"), input = $("wemail"), btn = $("wbtn"), msg = $("wmsg");
+  const T = fr
+    ? { ok:"C'est noté ! On te prévient au lancement.", bad:"Cette adresse ne semble pas valide.", net:"Oups, ça n'a pas marché. Réessaie dans un instant.", busy:"Envoi…" }
+    : { ok:"You're on the list! We'll tell you at launch.", bad:"This address doesn't look right.", net:"Oops, that didn't work. Try again in a moment.", busy:"Sending…" };
+  const label = btn.textContent;
+  const show = (text, kind) => { msg.textContent = text; msg.className = "wmsg " + kind; };
+  input.addEventListener("input", () => { if (msg.classList.contains("err")) show("", ""); });
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (form.website.value) { show(T.ok, "ok"); return; }   // un robot a rempli le champ caché
+    const email = input.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 254) { show(T.bad, "err"); input.focus(); return; }
+    btn.disabled = true; btn.textContent = T.busy;
+    try {
+      const r = await fetch("https://ezkyuvdndslkoeiegorg.supabase.co/rest/v1/rpc/join_waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: "sb_publishable_aYej0xP8FtfrjFsFMa6vFA_ISKcyu9I" },
+        body: JSON.stringify({ p_email: email, p_lang: fr ? "fr" : "en" })
+      });
+      if (r.ok) { show(T.ok, "ok"); input.value = ""; form.style.display = "none"; }
+      else if (r.status === 400) show(T.bad, "err");
+      else show(T.net, "err");
+    } catch { show(T.net, "err"); }
+    btn.disabled = false; btn.textContent = label;
+  });
+})();
 </script>
 </body>
 </html>
