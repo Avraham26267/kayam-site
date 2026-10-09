@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kayam · Mon compte</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F5F6F1">
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="site.css">
+<style>
+  main.wide { max-width:1040px; }
+  .hidden { display:none !important; }
+  form.login { display:flex; flex-direction:column; gap:10px; }
+  .field { width:100%; border:1.5px solid var(--line); background:var(--white); border-radius:16px; padding:15px 16px; font:inherit; color:var(--dark); outline:0; }
+  .field:focus { border-color:var(--dark); }
+  button.btn { width:100%; border:0; cursor:pointer; font-family:inherit; margin:6px 0 0; }
+  button.btn:disabled { opacity:.6; cursor:default; }
+  .link { background:none; border:0; padding:6px 0; font:inherit; font-weight:700; color:var(--green); cursor:pointer; text-decoration:underline; }
+  .msg { min-height:22px; font-weight:700; font-size:15px; margin:8px 0 0; }
+  .msg.ok { color:var(--green); } .msg.err { color:#B3261E; }
+  .stats { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin:8px 0 28px; }
+  .stat { background:var(--card); color:#F2F5EE; border-radius:22px; padding:18px; }
+  .stat small { display:block; color:#A3ADA4; font-size:13px; font-weight:700; }
+  .stat b { display:block; font-size:30px; letter-spacing:-.04em; font-weight:900; margin:4px 0 2px; font-variant-numeric:tabular-nums; }
+  .stat b.l { color:var(--lime); }
+  .stat span { color:#A3ADA4; font-size:13px; }
+  .tabs { display:flex; gap:6px; flex-wrap:wrap; background:rgba(17,22,15,.06); padding:5px; border-radius:999px; margin:0 0 18px; }
+  .tabs button { border:0; background:none; font:inherit; font-weight:700; font-size:15px; padding:9px 16px; border-radius:999px; cursor:pointer; color:var(--sage); }
+  .tabs button.on { background:var(--white); color:var(--dark); box-shadow:0 2px 8px rgba(17,22,15,.08); }
+  .sess h3 { font-size:18px; letter-spacing:-.02em; margin:0; }
+  .sess .when { color:var(--sage); font-size:14px; margin:2px 0 10px; }
+  .ex { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px solid var(--line); font-size:15px; }
+  .ex b { font-weight:700; }
+  .ex span { color:var(--sage); text-align:right; font-variant-numeric:tabular-nums; }
+  table.data { background:var(--white); border-radius:22px; overflow:hidden; box-shadow:0 1px 0 var(--line), 0 10px 30px rgba(17,22,15,.06); }
+  table.data th, table.data td { padding:12px 16px; }
+  table.data td.n, table.data th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .chart { background:var(--white); border-radius:22px; padding:16px; margin-bottom:14px; box-shadow:0 1px 0 var(--line), 0 10px 30px rgba(17,22,15,.06); }
+  .chart svg { width:100%; height:220px; display:block; }
+  .empty { color:var(--sage); background:var(--white); border-radius:22px; padding:22px; }
+  .row2 { display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .synced { color:var(--sage); font-size:14px; }
+  @media (max-width:640px) { .stats { grid-template-columns:1fr; } .stat b { font-size:26px; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="img/logo.png" alt=""><b>kayam<span>.</span></b></a>
+    <button class="pill hidden" id="logout" style="border:0;cursor:pointer;font-family:inherit">Se déconnecter</button>
+  </div>
+</header>
+
+<!-- Connexion -->
+<main class="narrow" id="loginView">
+  <p class="kicker" data-t="kick">Mon compte</p>
+  <h1 data-t="loginTitle">Connecte-toi à Kayam.</h1>
+  <p class="sub" data-t="loginSub">Le même compte que dans l'app. Tu retrouves tes séances, tes records, tes repas et ton poids sur grand écran.</p>
+  <form class="login" id="loginForm" novalidate>
+    <input class="field" type="email" id="email" autocomplete="email" inputmode="email" placeholder="ton@email.com" data-ph="email" required>
+    <input class="field" type="password" id="password" autocomplete="current-password" placeholder="Mot de passe" data-ph="password">
+    <button class="btn" type="submit" id="loginBtn" data-t="login">Se connecter</button>
+  </form>
+  <p class="msg" id="loginMsg" role="status" aria-live="polite"></p>
+  <p class="note"><span data-t="noPw">Compte Apple ou Google, ou mot de passe oublié ?</span><br>
+    <button class="link" id="magic" data-t="magic">Recevoir un lien de connexion par e-mail</button></p>
+</main>
+
+<!-- Le compte -->
+<main class="wide hidden" id="accountView">
+  <div class="row2">
+    <h1 id="hello">Bonjour.</h1>
+    <span class="synced" id="synced"></span>
+  </div>
+  <p class="sub" id="goalLine"></p>
+  <div class="stats" id="stats"></div>
+  <div class="tabs" role="tablist" id="tabs">
+    <button class="on" data-tab="sessions" data-t="tSessions">Séances</button>
+    <button data-tab="records" data-t="tRecords">Records</button>
+    <button data-tab="meals" data-t="tMeals">Repas</button>
+    <button data-tab="weight" data-t="tWeight">Poids</button>
+    <button data-tab="export" data-t="tExport">Exporter</button>
+  </div>
+  <section id="panel"></section>
+</main>
+
+<footer>
+  <div class="wrap row">
+    <div>© <span id="year">2026</span> Kayam</div>
+    <div class="links">
+      <a href="privacy.html" data-t="privacy">Confidentialité</a>
+      <a href="mailto:kayam.support@gmail.com">Contact</a>
+    </div>
+  </div>
+  <div class="bigname" aria-hidden="true">kayam<span>.</span></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+// Mon compte : lit la copie privée que l'app sauvegarde (table user_data, chacun ne lit que la sienne).
+// Rien n'est modifié ici : on regarde seulement. Tout le texte est inséré en textContent (jamais en HTML).
+const fr = (navigator.language || "fr").slice(0, 2) === "fr";
+const T = fr ? {
+  login:"Se connecter", busy:"Connexion…", bad:"E-mail ou mot de passe incorrect.", noEmail:"Écris d'abord ton e-mail.",
+  sent:"C'est envoyé. Ouvre le lien reçu par e-mail sur cet appareil.", net:"Oups, ça n'a pas marché. Réessaie dans un instant.",
+  hello:n => n ? `Bonjour, ${n}.` : "Bonjour.", synced:d => `Sauvegardé depuis l'app ${d}`, logout:"Se déconnecter",
+  week:"Cette semaine", sessions:"séances", weight:"Poids", kcal:"Calories moyennes", per7:"sur les 7 derniers jours notés",
+  noWeight:"Aucune pesée", noMeals:"Aucun repas noté", since:"depuis 2 semaines", goal:{"Build muscle":"Prise de masse","Lose fat":"Sèche","Get stronger":"Recomposition"},
+  days:d => `${d} jours d'entraînement par semaine`,
+  empty:"Rien ici pour l'instant. Ouvre Kayam sur ton iPhone, connecté à ce compte : tes données arrivent ici toutes seules.",
+  sets:"séries", min:"min", best:"Meilleure série", date:"Date", exercise:"Exercice", eaten:"Mangé", protein:"Protéines", meals:"Repas",
+  noRecords:"Tes records apparaîtront après tes premières séances avec des poids.",
+  exportTitle:"Toutes tes données, dans un fichier", exportSub:"Séances, routines, repas, pesées, mensurations et profil, au format JSON. Le même export que dans l'app.",
+  download:"Télécharger mes données", weightTitle:"Ton poids", lastWeighins:"Dernières pesées", meal:"repas", photos:"Tes photos de progrès restent privées dans l'app."
+} : {
+  login:"Sign in", busy:"Signing in…", bad:"Wrong email or password.", noEmail:"Enter your email first.",
+  sent:"Sent. Open the link from the email on this device.", net:"Oops, that didn't work. Try again in a moment.",
+  hello:n => n ? `Hi, ${n}.` : "Hi.", synced:d => `Saved from the app ${d}`, logout:"Sign out",
+  week:"This week", sessions:"workouts", weight:"Weight", kcal:"Average calories", per7:"over the last 7 logged days",
+  noWeight:"No weigh-ins", noMeals:"No meals logged", since:"over 2 weeks", goal:{"Build muscle":"Building muscle","Lose fat":"Losing fat","Get stronger":"Recomposition"},
+  days:d => `${d} training days a week`,
+  empty:"Nothing here yet. Open Kayam on your iPhone, signed in to this account: your data shows up here on its own.",
+  sets:"sets", min:"min", best:"Best set", date:"Date", exercise:"Exercise", eaten:"Eaten", protein:"Protein", meals:"Meals",
+  noRecords:"Your records will show up after your first workouts with weights.",
+  exportTitle:"All your data, in one file", exportSub:"Workouts, routines, meals, weigh-ins, measurements and profile, as JSON. The same export as in the app.",
+  download:"Download my data", weightTitle:"Your weight", lastWeighins:"Latest weigh-ins", meal:"meals", photos:"Your progress photos stay private in the app."
+};
+const EN_UI = { kick:"My account", loginTitle:"Sign in to Kayam.", loginSub:"The same account as in the app. See your workouts, records, meals and weight on a big screen.",
+  login:"Sign in", noPw:"Apple or Google account, or forgot your password?", magic:"Get a sign-in link by email",
+  tSessions:"Workouts", tRecords:"Records", tMeals:"Meals", tWeight:"Weight", tExport:"Export", privacy:"Privacy" };
+if (!fr) {
+  document.documentElement.lang = "en";
+  document.querySelectorAll("[data-t]").forEach(el => { if (EN_UI[el.dataset.t]) el.textContent = EN_UI[el.dataset.t]; });
+  document.getElementById("password").placeholder = "Password";
+  document.getElementById("email").placeholder = "you@email.com";
+}
+document.getElementById("year").textContent = new Date().getFullYear();
+
+const sb = supabase.createClient("https://ezkyuvdndslkoeiegorg.supabase.co", "sb_publishable_aYej0xP8FtfrjFsFMa6vFA_ISKcyu9I");
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const locale = fr ? "fr-FR" : "en-US";
+const num = (v, d = 0) => Number(v).toLocaleString(locale, { maximumFractionDigits: d, minimumFractionDigits: 0 });
+// Les dates de l'app = secondes depuis le 1er janvier 2001 (format Apple par défaut)
+const appDate = t => typeof t === "number" ? new Date((t + 978307200) * 1000) : new Date(t);
+const day = d => d.toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
+let NAMES = {};
+fetch("exercise-names.json").then(r => r.json()).then(j => { NAMES = j; if (state) render(); }).catch(() => {});
+const exName = n => (fr && NAMES[n] && NAMES[n][0]) || n;
+
+let state = null, tab = "sessions";
+
+// ---------- Connexion ----------
+const msg = (text, kind) => { $("loginMsg").textContent = text; $("loginMsg").className = "msg " + (kind || ""); };
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = $("email").value.trim(), password = $("password").value;
+  if (!email || !password) { msg(fr ? "Écris ton e-mail et ton mot de passe." : "Enter your email and password.", "err"); return; }
+  $("loginBtn").disabled = true; $("loginBtn").textContent = T.busy;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  $("loginBtn").disabled = false; $("loginBtn").textContent = T.login;
+  if (error) msg(error.status === 400 ? T.bad : T.net, "err");
+});
+$("magic").addEventListener("click", async () => {
+  const email = $("email").value.trim();
+  if (!email) { msg(T.noEmail, "err"); $("email").focus(); return; }
+  const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: location.origin + "/compte.html" } });
+  msg(error ? T.net : T.sent, error ? "err" : "ok");
+});
+$("logout").textContent = T.logout;
+$("logout").addEventListener("click", async () => { await sb.auth.signOut(); state = null; show(false); });
+
+function show(signedIn) {
+  $("loginView").classList.toggle("hidden", signedIn);
+  $("accountView").classList.toggle("hidden", !signedIn);
+  $("logout").classList.toggle("hidden", !signedIn);
+}
+
+sb.auth.onAuthStateChange((_event, session) => {
+  if (session) { show(true); if (!state) load(session.user); }
+  else show(false);
+});
+
+// ---------- Les données ----------
+async function load(user) {
+  const { data, error } = await sb.from("user_data").select("kind, data, updated_at");
+  const rows = error ? [] : (data || []);
+  const by = Object.fromEntries(rows.map(r => [r.kind, r]));
+  const meta = user.user_metadata || {};
+  const workouts = by.workouts?.data || {};
+  state = {
+    meta, rows,
+    imperial: meta.units === "lbs",
+    history: (workouts.history || []).filter(s => s.endedAt).sort((a, b) => b.startedAt - a.startedAt),
+    routines: workouts.routines || [],
+    days: by.meals?.data?.days || {},
+    weighIns: (Array.isArray(by.weighins?.data) ? by.weighins.data : []).slice().sort((a, b) => a.date - b.date),
+    updated: rows.map(r => new Date(r.updated_at)).sort((a, b) => b - a)[0]
+  };
+  render();
+}
+
+const unit = () => state.imperial ? "lbs" : "kg";
+const w = kg => state.imperial ? kg * 2.20462 : kg;
+const isWork = s => s.done && s.kind !== "warmup";
+const mealKcal = m => m.ateOut ? ({ small: 500, medium: 800, large: 1200 })[m.ateOut] : (m.foods || []).reduce((a, f) => a + f.food.kcal * f.grams / 100, 0);
+const mealProt = m => m.ateOut ? ({ small: 25, medium: 35, large: 45 })[m.ateOut] : (m.foods || []).reduce((a, f) => a + f.food.protein * f.grams / 100, 0);
+
+function render() {
+  const m = state.meta;
+  $("hello").textContent = T.hello(m.first_name || "");
+  $("synced").textContent = state.updated ? T.synced(state.updated.toLocaleDateString(locale, { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })) : "";
+  const goal = [T.goal[m.goal], m.days_per_week ? T.days(String(m.days_per_week).replace(" to ", (fr ? " à " : " to ")).replace("5 or more", fr ? "5 ou plus" : "5+")) : null].filter(Boolean);
+  $("goalLine").textContent = goal.join(" · ");
+  renderStats();
+  renderTab();
+}
+
+function stat(label, value, sub, lime) {
+  const c = el("div", "stat"); c.append(el("small", null, label), el("b", lime ? "l" : null, value), el("span", null, sub)); return c;
+}
+function renderStats() {
+  const now = new Date(), monday = new Date(now); monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  const done = state.history.filter(s => appDate(s.startedAt) >= monday).length;
+  const ws = state.weighIns, last = ws[ws.length - 1];
+  let wv = T.noWeight, wsub = "";
+  if (last) {
+    wv = `${num(w(last.kg), 1)} ${unit()}`;
+    const ref = ws.filter(x => appDate(x.date) <= new Date(appDate(last.date) - 14 * 864e5)).pop();
+    if (ref) { const d = w(last.kg) - w(ref.kg); wsub = `${d > 0 ? "+" : d < 0 ? "−" : ""}${num(Math.abs(d), 1)} ${unit()} ${T.since}`; }
+  }
+  const logged = Object.keys(state.days).sort().reverse()
+    .map(k => (state.days[k] || []).filter(x => x.status === "confirmed")).filter(a => a.length).slice(0, 7);
+  const avg = logged.length ? logged.reduce((a, ms) => a + ms.reduce((b, x) => b + mealKcal(x), 0), 0) / logged.length : null;
+  $("stats").replaceChildren(
+    stat(T.week, String(done), T.sessions, true),
+    stat(T.weight, wv, wsub),
+    stat(T.kcal, avg == null ? "—" : `${num(Math.round(avg))}`, avg == null ? T.noMeals : `kcal · ${T.per7}`)
+  );
+}
+
+$("tabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-tab]"); if (!b) return;
+  tab = b.dataset.tab;
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
+  renderTab();
+});
+
+function renderTab() {
+  const p = $("panel"); p.replaceChildren();
+  ({ sessions, records, meals, weight, exportTab })[tab === "export" ? "exportTab" : tab](p);
+}
+
+function emptyBox(p, text) { p.append(el("p", "empty", text || T.empty)); }
+
+function sessions(p) {
+  if (!state.history.length) return emptyBox(p);
+  for (const s of state.history.slice(0, 30)) {
+    const c = el("div", "card sess");
+    const start = appDate(s.startedAt), end = appDate(s.endedAt);
+    const mins = Math.max(1, Math.round((end - start) / 60000));
+    const nSets = (s.exercises || []).reduce((a, e) => a + (e.sets || []).filter(isWork).length, 0);
+    c.append(el("h3", null, s.name || "—"), el("p", "when", `${day(start)} · ${mins} ${T.min} · ${nSets} ${T.sets}`));
+    for (const e of s.exercises || []) {
+      const work = (e.sets || []).filter(isWork);
+      if (!work.length) continue;
+      const r = el("div", "ex");
+      const text = work.map(x => x.kg ? `${num(w(x.kg), 1)} × ${x.reps ?? "–"}` : x.seconds ? `${Math.round(x.seconds / 60)} ${T.min}` : `× ${x.reps ?? "–"}`).join(" · ");
+      r.append(el("b", null, exName(e.exerciseName)), el("span", null, text));
+      c.append(r);
+    }
+    p.append(c);
+  }
+}
+
+function records(p) {
+  const best = {};
+  for (const s of state.history) for (const e of s.exercises || []) for (const x of e.sets || []) {
+    if (!isWork(x) || !x.kg || !x.reps) continue;
+    const b = best[e.exerciseName];
+    if (!b || x.kg > b.kg || (x.kg === b.kg && x.reps > b.reps)) best[e.exerciseName] = { kg: x.kg, reps: x.reps, date: appDate(s.startedAt) };
+  }
+  const names = Object.keys(best).sort((a, b) => exName(a).localeCompare(exName(b), locale));
+  if (!names.length) return emptyBox(p, T.noRecords);
+  const t = el("table", "data"), head = el("tr");
+  head.append(el("th", null, T.exercise), el("th", "n", T.best), el("th", "n", T.date)); t.append(head);
+  for (const n of names) {
+    const r = el("tr"), b = best[n];
+    r.append(el("td", null, exName(n)), el("td", "n", `${num(w(b.kg), 1)} ${unit()} × ${b.reps}`), el("td", "n", day(b.date)));
+    t.append(r);
+  }
+  const wrap = el("div", "table-wrap"); wrap.style.padding = "0"; wrap.append(t); p.append(wrap);
+}
+
+function meals(p) {
+  const keys = Object.keys(state.days).sort().reverse().filter(k => (state.days[k] || []).length).slice(0, 21);
+  if (!keys.length) return emptyBox(p);
+  const t = el("table", "data"), head = el("tr");
+  head.append(el("th", null, T.date), el("th", "n", T.eaten), el("th", "n", T.protein), el("th", "n", T.meals)); t.append(head);
+  for (const k of keys) {
+    const all = state.days[k], eaten = all.filter(x => x.status === "confirmed");
+    const [y, mo, d] = k.split("-").map(Number);
+    const r = el("tr");
+    r.append(el("td", null, day(new Date(y, mo - 1, d))),
+             el("td", "n", eaten.length ? `${num(Math.round(eaten.reduce((a, x) => a + mealKcal(x), 0)))} kcal` : "—"),
+             el("td", "n", eaten.length ? `${num(Math.round(eaten.reduce((a, x) => a + mealProt(x), 0)))} g` : "—"),
+             el("td", "n", `${eaten.length}/${all.length}`));
+    t.append(r);
+  }
+  const wrap = el("div", "table-wrap"); wrap.style.padding = "0"; wrap.append(t); p.append(wrap);
+}
+
+function weight(p) {
+  const ws = state.weighIns;
+  if (!ws.length) return emptyBox(p);
+  const pts = ws.slice(-60).map(x => ({ t: appDate(x.date).getTime(), v: w(x.kg) }));
+  const box = el("div", "chart");
+  box.append(el("h2", null, T.weightTitle));
+  box.lastChild.style.margin = "0 0 8px";
+  const W = 800, H = 220, P = 34;
+  const t0 = pts[0].t, t1 = Math.max(pts[pts.length - 1].t, t0 + 1);
+  const lo = Math.min(...pts.map(x => x.v)) - 0.5, hi = Math.max(...pts.map(x => x.v)) + 0.5;
+  const X = t => P + (t - t0) / (t1 - t0) * (W - 2 * P), Y = v => H - P - (v - lo) / (hi - lo) * (H - 2 * P);
+  const NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", T.weightTitle);
+  const line = document.createElementNS(NS, "polyline");
+  line.setAttribute("points", pts.map(x => `${X(x.t).toFixed(1)},${Y(x.v).toFixed(1)}`).join(" "));
+  line.setAttribute("fill", "none"); line.setAttribute("stroke", "#4C7420"); line.setAttribute("stroke-width", "3");
+  line.setAttribute("stroke-linejoin", "round"); line.setAttribute("stroke-linecap", "round");
+  svg.append(line);
+  for (const [v, anchor] of [[hi - 0.5, "hi"], [lo + 0.5, "lo"]]) {
+    const tx = document.createElementNS(NS, "text");
+    tx.setAttribute("x", 2); tx.setAttribute("y", Y(v) + 4); tx.setAttribute("font-size", "13"); tx.setAttribute("fill", "#5E685F");
+    tx.textContent = num(v, 1); svg.append(tx);
+  }
+  const lastPt = pts[pts.length - 1], dot = document.createElementNS(NS, "circle");
+  dot.setAttribute("cx", X(lastPt.t)); dot.setAttribute("cy", Y(lastPt.v)); dot.setAttribute("r", 5); dot.setAttribute("fill", "#11160F");
+  svg.append(dot);
+  box.append(svg); p.append(box);
+  const t = el("table", "data"), head = el("tr");
+  head.append(el("th", null, T.lastWeighins), el("th", "n", unit())); t.append(head);
+  for (const x of ws.slice(-10).reverse()) {
+    const r = el("tr"); r.append(el("td", null, day(appDate(x.date))), el("td", "n", num(w(x.kg), 1))); t.append(r);
+  }
+  const wrap = el("div", "table-wrap"); wrap.style.padding = "0"; wrap.append(t); p.append(wrap);
+  p.append(el("p", "note", T.photos));
+}
+
+function exportTab(p) {
+  const c = el("div", "card");
+  c.append(el("h2", null, T.exportTitle), el("p", "muted", T.exportSub));
+  c.firstChild.style.marginTop = "0";
+  const b = el("button", "btn", T.download);
+  b.style.border = "0"; b.style.cursor = "pointer"; b.style.fontFamily = "inherit"; b.style.width = "100%";
+  b.addEventListener("click", () => {
+    const out = { exportedAt: new Date().toISOString(), profile: state.meta };
+    for (const r of state.rows) out[r.kind] = r.data;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }));
+    const a = document.createElement("a"); a.href = url; a.download = `kayam-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  c.append(b); p.append(c);
+}
+</script>
+</body>
+</html>
