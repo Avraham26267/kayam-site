@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kayam · E-mail confirmé</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F5F6F1">
+<link rel="icon" href="/img/logo.png">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/img/logo.png" alt=""><b>kayam<span>.</span></b></a>
+  </div>
+</header>
+<!-- Le lien de confirmation de l'e-mail (inscription dans l'app) arrive ici.
+     Supabase ajoute ?error=... ou #error=... quand le lien a expiré ou a déjà servi. -->
+<main class="narrow">
+  <p class="kicker" id="k">Inscription</p>
+  <h1 id="t">Ton e-mail est <span class="s">confirmé.</span></h1>
+  <p class="sub" id="s">Retourne dans Kayam et connecte-toi avec ton e-mail et ton mot de passe.</p>
+  <a class="btn" href="kayam://" id="b">Ouvrir Kayam</a>
+</main>
+<footer>
+  <div class="wrap row">
+    <div>© <span id="year">2026</span> Kayam</div>
+    <div class="links">
+      <a href="/privacy.html" id="flink1">Confidentialité</a>
+      <a href="mailto:kayam.support@gmail.com">Contact</a>
+    </div>
+  </div>
+  <div class="bigname" aria-hidden="true">kayam<span>.</span></div>
+</footer>
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+const fr = (navigator.language || "fr").slice(0, 2) === "fr";
+const params = new URLSearchParams(location.search + "&" + location.hash.slice(1));
+const failed = params.has("error") || params.has("error_code");
+const $ = id => document.getElementById(id);
+if (failed) {
+  $("t").innerHTML = fr ? 'Ce lien a <span class="s">expiré.</span>' : 'This link has <span class="s">expired.</span>';
+  $("s").textContent = fr
+    ? "Il a peut-être déjà servi : essaie d'abord de te connecter dans Kayam. Si ça ne marche pas, recrée ton compte dans l'app pour recevoir un nouveau lien."
+    : "It may have been used already: first try signing in to Kayam. If that doesn't work, create your account again in the app to get a new link.";
+}
+if (!fr) {
+  document.documentElement.lang = "en";
+  $("k").textContent = "Sign up";
+  if (!failed) {
+    $("t").innerHTML = 'Your email is <span class="s">confirmed.</span>';
+    $("s").textContent = "Go back to Kayam and sign in with your email and password.";
+  }
+  $("b").textContent = "Open Kayam";
+  $("flink1").textContent = "Privacy";
+}
+// Le jeton de connexion éventuel ne doit pas rester dans l'adresse
+if (location.hash) history.replaceState(null, "", location.pathname + (failed ? "?error=1" : ""));
+</script>
+</body>
+</html>
