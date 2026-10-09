@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kayam · Page introuvable</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F5F6F1">
+<link rel="icon" href="/img/logo.png">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/img/logo.png" alt=""><b>kayam<span>.</span></b></a>
+    <a class="pill" href="/#fin" id="topcta">Préviens-moi</a>
+  </div>
+</header>
+<main class="narrow">
+  <p class="kicker">404</p>
+  <h1 id="t">Cette page a sauté <span class="s">sa séance.</span></h1>
+  <p class="sub" id="s">Elle n'existe pas, ou plus. Retourne à l'accueil.</p>
+  <a class="btn" href="/" id="b">Retour à l'accueil</a>
+</main>
+<footer>
+  <div class="wrap row">
+    <div>© <span id="year">2026</span> Kayam</div>
+    <div class="links">
+      <a href="/privacy.html" id="flink1">Confidentialité</a>
+      <a href="mailto:kayam.support@gmail.com">Contact</a>
+    </div>
+  </div>
+  <div class="bigname" aria-hidden="true">kayam<span>.</span></div>
+</footer>
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+if ((navigator.language || "fr").slice(0, 2) !== "fr") {
+  document.documentElement.lang = "en";
+  document.getElementById("t").innerHTML = 'This page skipped <span class="s">its workout.</span>';
+  document.getElementById("s").textContent = "It doesn't exist, or not anymore. Head back home.";
+  document.getElementById("b").textContent = "Back to home";
+  document.getElementById("topcta").textContent = "Notify me";
+  document.getElementById("flink1").textContent = "Privacy";
+}
+</script>
+</body>
+</html>

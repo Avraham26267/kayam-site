@@ -5,38 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kayam · Confidentialité</title>
 <meta name="description" content="Politique de confidentialité de l'app Kayam.">
-<style>
-  :root { --cream:#F7F7F2; --surface:#FFFFFF; --dark:#1C261F; --sage:#737D73; --green:#5C8C33; --lime:#CCED78; --border:rgba(0,0,0,.09); }
-  @media (prefers-color-scheme: dark) {
-    :root { --cream:#0E1310; --surface:#1A211C; --dark:#F1F4EC; --sage:#9AA59B; --green:#A9D86E; --border:rgba(255,255,255,.09); }
-  }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--cream); color:var(--dark); font:16px/1.6 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; }
-  main { max-width:760px; margin:0 auto; padding:32px 16px 64px; }
-  header { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
-  .logo { font-size:28px; font-weight:800; text-decoration:none; color:var(--dark); }
-  .logo span { color:var(--green); }
-  .lang a { color:var(--green); font-weight:600; text-decoration:none; margin-left:12px; }
-  h1 { font-size:32px; line-height:1.2; margin:8px 0 4px; }
-  h2 { font-size:20px; margin:32px 0 8px; }
-  .muted { color:var(--sage); }
-  .card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:20px; margin:16px 0; }
-  table { width:100%; border-collapse:collapse; font-size:15px; }
-  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--border); vertical-align:top; }
-  th { color:var(--sage); font-weight:600; }
-  .pill { display:inline-block; background:var(--lime); color:#1C261F; border-radius:999px; padding:2px 10px; font-size:13px; font-weight:700; }
-  a { color:var(--green); }
-  section[lang] { scroll-margin-top:16px; }
-  hr { border:0; border-top:1px solid var(--border); margin:48px 0; }
-  .table-wrap { overflow-x:auto; }
-</style>
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F5F6F1">
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="site.css">
 </head>
 <body>
-<main>
-<header>
-  <a class="logo" href="./">kayam<span>.</span></a>
-  <nav class="lang"><a href="#fr">Français</a><a href="#en">English</a></nav>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="img/logo.png" alt=""><b>kayam<span>.</span></b></a>
+    <a class="pill" href="./#fin" id="topcta">Préviens-moi</a>
+  </div>
 </header>
+<main>
+<p class="kicker"><a href="#fr">Français</a> · <a href="#en">English</a></p>
 
 <section id="fr" lang="fr">
   <h1>Politique de confidentialité</h1>
@@ -46,8 +28,8 @@
     <strong>En bref</strong>
     <ul>
       <li>Pas de publicité, pas de pistage, pas de revente de données. Jamais.</li>
-      <li>Tes repas, tes séances, tes pesées et tes photos restent <strong>sur ton téléphone</strong>.</li>
-      <li>Seuls ton compte, ton profil et ton cercle d'amis sont gardés en ligne (Supabase), pour que l'app fonctionne.</li>
+      <li>Tes repas, tes séances, tes pesées et tes photos sont sur ton téléphone. Avec un compte, une copie <strong>privée</strong> est gardée en ligne (Supabase) pour tout retrouver sur un nouveau téléphone. Personne d'autre ne peut la lire.</li>
+      <li>Tes amis ne voient que ce que tu choisis de partager. Jamais tes photos ni ton poids.</li>
       <li>Tu peux exporter toutes tes données et supprimer ton compte depuis l'app, à tout moment.</li>
     </ul>
   </div>
@@ -114,8 +96,8 @@
     <strong>In short</strong>
     <ul>
       <li>No ads, no tracking, no selling of data. Ever.</li>
-      <li>Your meals, workouts, weigh-ins and photos stay <strong>on your phone</strong>.</li>
-      <li>Only your account, profile and friends circle are stored online (Supabase), so the app can work.</li>
+      <li>Your meals, workouts, weigh-ins and photos are on your phone. With an account, a <strong>private</strong> copy is kept online (Supabase) so you get everything back on a new phone. Nobody else can read it.</li>
+      <li>Your friends only see what you choose to share. Never your photos or your weight.</li>
       <li>You can export all your data and delete your account from the app at any time.</li>
     </ul>
   </div>
@@ -172,5 +154,22 @@
   <p>If this policy changes, the date at the top will be updated, and important changes will be announced in the app.</p>
 </section>
 </main>
+<footer>
+  <div class="wrap row">
+    <div>© <span id="year">2026</span> Kayam</div>
+    <div class="links">
+      <a href="privacy.html" id="flink1">Confidentialité</a>
+      <a href="mailto:kayam.support@gmail.com" id="flink2">Contact</a>
+    </div>
+  </div>
+  <div class="bigname" aria-hidden="true">kayam<span>.</span></div>
+</footer>
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+if ((navigator.language || "fr").slice(0, 2) !== "fr") {
+  document.getElementById("topcta").textContent = "Notify me";
+  document.getElementById("flink1").textContent = "Privacy";
+}
+</script>
 </body>
 </html>

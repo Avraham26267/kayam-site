@@ -1,0 +1,73 @@
+/* Kayam : le style commun des pages du site (confidentialité, routine partagée, invitation, 404).
+   Mêmes couleurs, même police, même barre du haut et même bas de page que l'accueil (et que l'app : Theme.swift). */
+:root {
+  --cream:#F5F6F1; --dark:#11160F; --ink:#1C261F; --sage:#5E685F; --green:#4C7420;
+  --lime:#CCED78; --card:#151B17; --white:#FFFFFF; --line:rgba(17,22,15,.10); --faint:#C9CEC3;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+* { box-sizing:border-box; }
+html { overflow-x:clip; }
+body { margin:0; background:var(--cream); color:var(--dark); overflow-x:clip; display:flex; flex-direction:column; min-height:100svh;
+       font:17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+       -webkit-font-smoothing:antialiased; }
+a { color:inherit; }
+img { display:block; max-width:100%; }
+.wrap { max-width:1240px; margin:0 auto; padding:0 24px; width:100%; }
+
+/* Barre du haut (comme l'accueil) */
+.topbar { position:sticky; top:0; z-index:20; background:rgba(245,246,241,.86); border-bottom:1px solid var(--line);
+          backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+.topbar .wrap { display:flex; align-items:center; justify-content:space-between; height:66px; }
+.brand { display:flex; align-items:center; gap:9px; font-weight:800; font-size:21px; letter-spacing:-.03em; text-decoration:none; }
+.brand img { width:30px; height:30px; padding:5px; border-radius:9px; background:var(--dark); }
+.brand span { color:var(--green); }
+.pill { display:inline-block; font-size:14px; font-weight:700; padding:9px 16px; border-radius:999px; background:var(--lime); color:var(--ink);
+        text-decoration:none; white-space:nowrap; }
+
+/* Contenu */
+main { flex:1; width:100%; max-width:760px; margin:0 auto; padding:56px 24px 96px; }
+main.narrow { max-width:520px; }
+.kicker { font-size:14px; font-weight:800; color:var(--green); letter-spacing:.04em; margin:0; }
+h1 { font-size:clamp(38px, 6vw, 60px); line-height:.98; letter-spacing:-.05em; font-weight:900; margin:12px 0 14px; }
+h1 .s { color:var(--sage); }
+h2 { font-size:24px; line-height:1.15; letter-spacing:-.03em; font-weight:800; margin:44px 0 10px; }
+p { margin:0 0 14px; }
+.sub, .muted { color:var(--sage); }
+.sub { font-size:19px; margin-bottom:28px; }
+ul { padding-left:20px; } li { margin:6px 0; }
+main a { color:var(--green); font-weight:600; }
+.card { background:var(--white); border-radius:22px; padding:20px; margin:0 0 14px; box-shadow:0 1px 0 var(--line), 0 10px 30px rgba(17,22,15,.06); }
+.card h2 { font-size:19px; margin:0 0 8px; }
+hr { border:0; border-top:1px solid var(--line); margin:64px 0; }
+
+/* Bouton principal : comme "Préviens-moi" (encre + citron) */
+.btn { display:block; text-align:center; background:var(--dark); color:var(--lime) !important; font-weight:800; font-size:18px;
+       text-decoration:none; padding:17px 24px; border-radius:999px; margin:24px 0 12px; transition:transform .2s; }
+.btn:active { transform:scale(.97); }
+.note { color:var(--sage); font-size:15px; text-align:center; }
+.note a { color:var(--dark); }
+
+/* Tableaux (confidentialité) */
+.table-wrap { overflow-x:auto; padding:6px 20px; }
+table { width:100%; border-collapse:collapse; font-size:15px; }
+th, td { text-align:left; padding:12px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+tr:last-child td { border-bottom:0; }
+th { color:var(--sage); font-weight:700; }
+
+/* Bas de page (comme l'accueil, avec le grand nom) */
+footer { background:var(--dark); color:#A3ADA4; font-size:14px; overflow:hidden; padding-top:40px; }
+footer .row { display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:space-between; }
+footer a { text-decoration:none; } footer a:hover { color:var(--cream); }
+footer .links { display:flex; gap:20px; }
+.bigname { font-size:24.5vw; font-weight:900; letter-spacing:-.07em; line-height:.9; color:var(--cream); text-align:center;
+           margin:30px 0 0; padding-bottom:3vw; white-space:nowrap; transform:translateY(30%); }
+.bigname span { color:var(--lime); }
+
+[dir=rtl] th, [dir=rtl] td { text-align:right; }
+
+/* Invitation : le code ; routine partagée : les lignes d'exercices */
+.code { font-size:40px; font-weight:900; letter-spacing:4px; text-align:center; margin:8px 0; font-variant-numeric:tabular-nums; }
+.card .row { display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-top:1px solid var(--line); font-weight:600; font-size:15px; }
+.card .row:first-of-type { border-top:0; }
+.card .row b { color:var(--green); font-variant-numeric:tabular-nums; white-space:nowrap; }
+[dir=rtl] .card .row { flex-direction:row-reverse; }
