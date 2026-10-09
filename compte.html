@@ -169,6 +169,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
 <script>
 // Mon compte : lit la copie privée que l'app sauvegarde (table user_data, chacun ne lit que la sienne).
 // Rien n'est modifié ici : on regarde seulement. Tout le texte est inséré en textContent (jamais en HTML).
@@ -241,7 +242,7 @@ $("magic").addEventListener("click", async () => {
   msg(error ? T.net : T.sent, error ? "err" : "ok");
 });
 // Apple et Google : on part chez eux, puis on revient ici connecté
-for (const [id, provider] of [["appleBtn", "apple"], ["googleBtn", "google"]]) {
+for (const [id, provider] of [["googleBtn", "google"]]) {
   $(id).addEventListener("click", async () => {
     // On vérifie d'abord que Supabase est prêt (sinon il affiche une page d'erreur brute)
     const { data, error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: location.origin + "/compte.html", skipBrowserRedirect: true } });
@@ -253,6 +254,24 @@ for (const [id, provider] of [["appleBtn", "apple"], ["googleBtn", "google"]]) {
     if (true) msg(fr ? "Cette connexion n'est pas encore activée. Utilise ton e-mail pour l'instant." : "This sign-in isn't switched on yet. Use your email for now.", "err");
   });
 }
+// Apple : "Sign in with Apple JS" (fenêtre Apple) puis Supabase vérifie la réponse d'Apple.
+// Pas de code secret côté serveur : rien à renouveler tous les 6 mois.
+const sha256 = async text => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)))]
+  .map(b => b.toString(16).padStart(2, "0")).join("");
+$("appleBtn").addEventListener("click", async () => {
+  try {
+    if (!window.AppleID) throw new Error("apple_js");
+    const raw = crypto.randomUUID() + crypto.randomUUID();
+    AppleID.auth.init({ clientId: "com.daniel.Kayam.web", scope: "name email", redirectURI: location.origin + "/compte.html",
+                        state: crypto.randomUUID(), nonce: await sha256(raw), usePopup: true });
+    const res = await AppleID.auth.signIn();
+    const { error } = await sb.auth.signInWithIdToken({ provider: "apple", token: res.authorization.id_token, nonce: raw });
+    if (error) throw error;
+  } catch (e) {
+    if (e && e.error === "popup_closed_by_user") return;   // fenêtre fermée : rien à dire
+    msg(fr ? "La connexion Apple n'a pas abouti. Réessaie, ou utilise ton e-mail." : "Apple sign-in didn't go through. Try again, or use your email.", "err");
+  }
+});
 // Retour d'Apple ou Google avec une erreur (dans l'adresse)
 {
   const back = new URLSearchParams(location.hash.slice(1) || location.search.slice(1));
