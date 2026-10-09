@@ -169,7 +169,6 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
 <script>
 // Mon compte : lit la copie privée que l'app sauvegarde (table user_data, chacun ne lit que la sienne).
 // Rien n'est modifié ici : on regarde seulement. Tout le texte est inséré en textContent (jamais en HTML).
@@ -258,32 +257,29 @@ for (const [id, provider] of [["googleBtn", "google"]]) {
 // Pas de code secret côté serveur : rien à renouveler tous les 6 mois.
 const sha256 = async text => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)))]
   .map(b => b.toString(16).padStart(2, "0")).join("");
-// Le nonce est préparé dès le chargement : Safari (iPhone) bloque la fenêtre Apple
-// si elle ne s'ouvre pas tout de suite après le toucher.
-let appleNonce = null;
-(async () => {
-  try {
-    if (!window.AppleID) return;
-    const raw = crypto.randomUUID() + crypto.randomUUID();
-    AppleID.auth.init({ clientId: "com.daniel.Kayam.web", scope: "name email", redirectURI: location.origin + "/compte.html",
-                        state: crypto.randomUUID(), nonce: await sha256(raw), usePopup: true });
-    appleNonce = raw;
-  } catch {}
-})();
+// Apple : on part sur la page d'Apple, qui revient ici avec un jeton (dans l'adresse, après le #).
+// Sans demander nom ni e-mail, Apple accepte ce retour direct : pas de fenêtre (Safari iPhone la bloque),
+// et Supabase vérifie le jeton lui-même : aucun code secret à renouveler.
 $("appleBtn").addEventListener("click", async () => {
-  const fail = detail => msg((fr ? "La connexion Apple n'a pas abouti. Réessaie, ou utilise ton e-mail." : "Apple sign-in didn't go through. Try again, or use your email.")
-                             + (detail ? ` (${detail})` : ""), "err");
-  if (!window.AppleID || !appleNonce) return fail("apple_js");
-  let res;
-  try {
-    res = await AppleID.auth.signIn();          // ouvert tout de suite, dans le même geste
-  } catch (e) {
-    if (e && e.error === "popup_closed_by_user") return;
-    return fail(e?.error || e?.message || "popup");
-  }
-  const { error } = await sb.auth.signInWithIdToken({ provider: "apple", token: res.authorization.id_token, nonce: appleNonce });
-  if (error) fail(error.message);
+  const raw = crypto.randomUUID() + crypto.randomUUID(), state = crypto.randomUUID();
+  try { sessionStorage.setItem("appleNonce", raw); sessionStorage.setItem("appleState", state); } catch {}
+  const params = new URLSearchParams({ client_id: "com.daniel.Kayam.web", redirect_uri: location.origin + "/compte.html",
+    response_type: "code id_token", response_mode: "fragment", state, nonce: await sha256(raw) });
+  location.href = "https://appleid.apple.com/auth/authorize?" + params.toString();
 });
+// Retour d'Apple : on donne le jeton à Supabase
+(async () => {
+  const back = new URLSearchParams(location.hash.slice(1));
+  const token = back.get("id_token");
+  if (!token) return;
+  history.replaceState(null, "", location.pathname);
+  let raw = null, state = null;
+  try { raw = sessionStorage.getItem("appleNonce"); state = sessionStorage.getItem("appleState"); sessionStorage.removeItem("appleNonce"); } catch {}
+  const fail = detail => msg((fr ? "La connexion Apple n'a pas abouti. Réessaie, ou utilise ton e-mail." : "Apple sign-in didn't go through. Try again, or use your email.") + ` (${detail})`, "err");
+  if (!raw || back.get("state") !== state) return fail("state");
+  const { error } = await sb.auth.signInWithIdToken({ provider: "apple", token, nonce: raw });
+  if (error) fail(error.message);
+})();
 // Retour d'Apple ou Google avec une erreur (dans l'adresse)
 {
   const back = new URLSearchParams(location.hash.slice(1) || location.search.slice(1));
