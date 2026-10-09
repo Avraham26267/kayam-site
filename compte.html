@@ -258,19 +258,31 @@ for (const [id, provider] of [["googleBtn", "google"]]) {
 // Pas de code secret côté serveur : rien à renouveler tous les 6 mois.
 const sha256 = async text => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)))]
   .map(b => b.toString(16).padStart(2, "0")).join("");
-$("appleBtn").addEventListener("click", async () => {
+// Le nonce est préparé dès le chargement : Safari (iPhone) bloque la fenêtre Apple
+// si elle ne s'ouvre pas tout de suite après le toucher.
+let appleNonce = null;
+(async () => {
   try {
-    if (!window.AppleID) throw new Error("apple_js");
+    if (!window.AppleID) return;
     const raw = crypto.randomUUID() + crypto.randomUUID();
     AppleID.auth.init({ clientId: "com.daniel.Kayam.web", scope: "name email", redirectURI: location.origin + "/compte.html",
                         state: crypto.randomUUID(), nonce: await sha256(raw), usePopup: true });
-    const res = await AppleID.auth.signIn();
-    const { error } = await sb.auth.signInWithIdToken({ provider: "apple", token: res.authorization.id_token, nonce: raw });
-    if (error) throw error;
+    appleNonce = raw;
+  } catch {}
+})();
+$("appleBtn").addEventListener("click", async () => {
+  const fail = detail => msg((fr ? "La connexion Apple n'a pas abouti. Réessaie, ou utilise ton e-mail." : "Apple sign-in didn't go through. Try again, or use your email.")
+                             + (detail ? ` (${detail})` : ""), "err");
+  if (!window.AppleID || !appleNonce) return fail("apple_js");
+  let res;
+  try {
+    res = await AppleID.auth.signIn();          // ouvert tout de suite, dans le même geste
   } catch (e) {
-    if (e && e.error === "popup_closed_by_user") return;   // fenêtre fermée : rien à dire
-    msg(fr ? "La connexion Apple n'a pas abouti. Réessaie, ou utilise ton e-mail." : "Apple sign-in didn't go through. Try again, or use your email.", "err");
+    if (e && e.error === "popup_closed_by_user") return;
+    return fail(e?.error || e?.message || "popup");
   }
+  const { error } = await sb.auth.signInWithIdToken({ provider: "apple", token: res.authorization.id_token, nonce: appleNonce });
+  if (error) fail(error.message);
 });
 // Retour d'Apple ou Google avec une erreur (dans l'adresse)
 {
