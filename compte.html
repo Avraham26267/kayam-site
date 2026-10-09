@@ -109,6 +109,22 @@
   .meas { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:10px; }
   .meas div { background:var(--cream); border-radius:16px; padding:14px; } .meas b { display:block; } .meas strong { font-size:24px; letter-spacing:-.03em; }
   .meas span { color:var(--sage); font-size:14px; margin-left:6px; }
+  .mrow { border-top:1px solid var(--line); padding:12px 0; }
+  .mrow:first-of-type { border-top:0; }
+  .mrow .h { display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
+  .mrow .h b { font-size:16px; } .mrow .h small { color:var(--sage); font-size:13px; font-weight:700; margin-right:8px; }
+  .mrow .h span { color:var(--sage); font-size:14px; white-space:nowrap; }
+  .mrow .ok { color:#4E7A1E; font-weight:800; margin-left:6px; }
+  .mrow.todo b, .mrow.todo .foods { opacity:.55; }
+  .foods { margin:6px 0 0; padding:0; list-style:none; font-size:14px; }
+  .foods li { display:flex; justify-content:space-between; gap:12px; padding:2px 0; }
+  .foods li span { color:var(--sage); white-space:nowrap; } .foods li.dish { font-weight:700; margin-top:4px; }
+  .srow .d .mrow { padding:8px 0; }
+  @media (max-width:640px) {
+    .tabs { flex-wrap:nowrap; } .tabs button { padding:9px 6px; font-size:14px; }
+    .mrow .h, .dayrow .h { flex-direction:column; gap:2px; align-items:flex-start; }
+    .mrow .h span, .dayrow .h span { white-space:normal; }
+  }
   .foot2 { color:var(--sage); font-size:14px; text-align:center; margin-top:26px; }
   @media (max-width:640px) { .avatar { width:80px; height:80px; font-size:34px; } .weekcard .big { font-size:40px; } .weekcard .right b { font-size:28px; } }
   @media (max-width:640px) { .stats { grid-template-columns:1fr; } .stat b { font-size:26px; } }
@@ -156,6 +172,7 @@
   <div class="tabs" role="tablist" id="tabs">
     <button class="on" data-tab="photos" data-t="tPhotos">Photos</button>
     <button data-tab="bilan" data-t="tBilan">Bilan</button>
+    <button data-tab="repas" data-t="tRepas">Repas</button>
     <button data-tab="corps" data-t="tCorps">Corps</button>
   </div>
   <section id="panel"></section>
@@ -229,6 +246,11 @@ const day = d => d.toLocaleDateString(locale, { weekday: "short", day: "numeric"
 let NAMES = {};
 fetch("exercise-names.json").then(r => r.json()).then(j => { NAMES = j; if (state) render(); }).catch(() => {});
 const exName = n => (fr && NAMES[n] && NAMES[n][0]) || n;
+// Les noms français des aliments, des repas et des plats (l'app les enregistre en anglais)
+let MEALNAMES = { foods: {}, words: {} };
+if (fr) fetch("meal-names.json").then(r => r.json()).then(j => { MEALNAMES = j; if (state && tab === "repas") renderTab(); }).catch(() => {});
+const word = n => (fr && MEALNAMES.words[n]) || n;
+const foodName = f => (fr && ((f.names && f.names.fr) || MEALNAMES.foods[f.name])) || f.name;
 
 let state = null, tab = "photos";
 
@@ -325,7 +347,11 @@ const A = fr ? {
   weightTitle:"Ton poids", weightLead:(a, b, d) => `<b>${a} → ${b}</b> (${d}) depuis ta première pesée.`, noWeight:"Pèse-toi dans l'app (Profil → Objectif) : ta courbe apparaîtra ici.",
   measTitle:"Tes mensurations", noMeas:"Ajoute tes mensurations dans l'app (Progrès → Corps).",
   parts:{waist:"Tour de taille", chest:"Poitrine", arm:"Bras", thigh:"Cuisse", hips:"Hanches"}, sets:"séries", ex:"exercices", min:"min", since:"depuis le début",
-  exported:"Exporter mes données", nPhotos:n => n > 1 ? `${n} photos` : "1 photo", noSession:"Séance introuvable (supprimée dans l'app ?)", inSession:"Dans cette séance"
+  exported:"Exporter mes données", nPhotos:n => n > 1 ? `${n} photos` : "1 photo", noSession:"Séance introuvable (supprimée dans l'app ?)", inSession:"Dans cette séance",
+  today:"Aujourd'hui", todayLead:(e, p, pr) => `Mangé <b>${e} kcal</b> sur ${p} prévues · <b>${pr} g</b> de protéines.`,
+  noToday:"Pas encore de repas prévu aujourd'hui. Crée ta journée dans l'app : elle apparaîtra ici.",
+  pastDays:"Jours précédents", pastLead:"Touche un jour pour voir ce que tu as mangé.", noPast:"Coche tes repas dans l'app : tes jours précédents apparaîtront ici.",
+  dayLine:(k, p, n) => `${k} kcal · ${p} g de protéines · ${n} repas`, notChecked:"pas coché", ateOut:s => `Au restaurant · ${s}`
 } : {
   sessions:"workouts", photos:"photos", records:"records", week:"This week", thisWeek:"this week",
   goal:{"Build muscle":"Building muscle","Lose fat":"Losing fat","Get stronger":"Recomposition"},
@@ -339,9 +365,13 @@ const A = fr ? {
   weightTitle:"Your weight", weightLead:(a, b, d) => `<b>${a} → ${b}</b> (${d}) since your first weigh-in.`, noWeight:"Weigh yourself in the app (Profile → Goal): your curve will show up here.",
   measTitle:"Your measurements", noMeas:"Add your measurements in the app (Progress → Body).",
   parts:{waist:"Waist", chest:"Chest", arm:"Arm", thigh:"Thigh", hips:"Hips"}, sets:"sets", ex:"exercises", min:"min", since:"since the start",
-  exported:"Export my data", nPhotos:n => n > 1 ? `${n} photos` : "1 photo", noSession:"Workout not found (deleted in the app?)", inSession:"In this workout"
+  exported:"Export my data", nPhotos:n => n > 1 ? `${n} photos` : "1 photo", noSession:"Workout not found (deleted in the app?)", inSession:"In this workout",
+  today:"Today", todayLead:(e, p, pr) => `Eaten <b>${e} kcal</b> of ${p} planned · <b>${pr} g</b> of protein.`,
+  noToday:"No meals planned today yet. Set up your day in the app: it will show up here.",
+  pastDays:"Previous days", pastLead:"Tap a day to see what you ate.", noPast:"Check your meals in the app: your previous days will show up here.",
+  dayLine:(k, p, n) => `${k} kcal · ${p} g of protein · ${n} meals`, notChecked:"not checked", ateOut:s => `Ate out · ${s}`
 };
-if (!fr) Object.assign(EN_UI, { tPhotos:"Photos", tBilan:"Summary", tCorps:"Body", exportBtn:"Export my data" });
+if (!fr) Object.assign(EN_UI, { tPhotos:"Photos", tBilan:"Summary", tRepas:"Meals", tCorps:"Body", exportBtn:"Export my data" });
 if (!fr) document.querySelectorAll("#accountView [data-t]").forEach(e => { if (EN_UI[e.dataset.t]) e.textContent = EN_UI[e.dataset.t]; });
 tab = "photos";
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]);
@@ -436,7 +466,7 @@ $("tabs").addEventListener("click", e => {
   document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
   renderTab();
 });
-function renderTab() { const p = $("panel"); p.replaceChildren(); ({ photos: photosTab, bilan: bilanTab, corps: corpsTab })[tab](p); }
+function renderTab() { const p = $("panel"); p.replaceChildren(); ({ photos: photosTab, bilan: bilanTab, repas: mealsTab, corps: corpsTab })[tab](p); }
 const emptyBox = (p, text) => p.append(el("p", "empty", text));
 function box(title, lead) { const b = el("div", "box"); b.append(el("h2", null, title)); if (lead) { const l = el("p", "lead"); l.innerHTML = lead; b.append(l); } return b; }
 
@@ -652,6 +682,61 @@ function bilanTab(p) {
     }
     p.append(b5);
   }
+}
+
+// ---------- Repas : la journée d'aujourd'hui et les jours précédents ----------
+const dayKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const keyDate = k => { const [y, mo, d] = k.split("-").map(Number); return new Date(y, mo - 1, d); };
+const amount = g => state.imperial ? `${num(g / 28.3495, 1)} oz` : `${num(g)} g`;
+const eatenOf = list => list.filter(m => m.status === "confirmed");
+const sumK = list => Math.round(list.reduce((a, m) => a + mealKcal(m), 0));
+const sumP = list => Math.round(list.reduce((a, m) => a + mealProt(m), 0));
+
+// Un repas : l'heure, le nom, ses aliments (groupés par plat)
+function mealRow(m) {
+  const r = el("div", "mrow" + (m.status === "confirmed" ? "" : " todo")), h = el("div", "h"), left = el("div");
+  left.append(el("small", null, appDate(m.time).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })), el("b", null, word(m.name)));
+  if (m.status === "confirmed") left.append(el("span", "ok", "✓"));
+  const kcal = `${num(Math.round(mealKcal(m)))} kcal · ${num(Math.round(mealProt(m)))} g`;
+  h.append(left, el("span", null, m.status === "confirmed" ? kcal : `${kcal} · ${A.notChecked}`));
+  r.append(h);
+  const ul = el("ul", "foods");
+  if (m.ateOut) ul.append(el("li", null, A.ateOut(word(m.ateOut.charAt(0).toUpperCase() + m.ateOut.slice(1)))));
+  else {
+    let lastDish = null;
+    for (const f of m.foods || []) {
+      if (f.dish && f.dish !== lastDish) ul.append(el("li", "dish", word(f.dish)));
+      lastDish = f.dish || null;
+      const li = el("li"); li.append(el("div", null, foodName(f.food)), el("span", null, amount(f.grams))); ul.append(li);
+    }
+  }
+  if (ul.children.length) r.append(ul);
+  return r;
+}
+
+function mealsTab(p) {
+  const days = state.days, todayKey = dayKey(new Date());
+  const today = (days[todayKey] || []).slice().sort((a, b) => a.time - b.time);
+  const b1 = box(A.today);
+  if (!today.length) b1.append(el("p", "lead", A.noToday));
+  else {
+    const l = el("p", "lead"); l.innerHTML = A.todayLead(num(sumK(eatenOf(today))), num(sumK(today)), num(sumP(eatenOf(today))));
+    b1.append(l); for (const m of today) b1.append(mealRow(m));
+  }
+  p.append(b1);
+
+  const past = Object.keys(days).filter(k => k < todayKey && eatenOf(days[k] || []).length).sort().reverse().slice(0, 60);
+  const b2 = box(A.pastDays, past.length ? A.pastLead : null);
+  if (!past.length) b2.append(el("p", "lead", A.noPast));
+  for (const k of past) {
+    const list = days[k].slice().sort((a, b) => a.time - b.time), eaten = eatenOf(list);
+    const r = el("div", "srow dayrow"), h = el("div", "h"), d = el("div", "d");
+    h.append(el("b", null, day(keyDate(k))), el("span", null, A.dayLine(num(sumK(eaten)), num(sumP(eaten)), eaten.length)));
+    for (const m of list) d.append(mealRow(m));
+    r.append(h, d); h.addEventListener("click", () => r.classList.toggle("open"));
+    b2.append(r);
+  }
+  p.append(b2);
 }
 
 // ---------- Corps : poids et mensurations ----------
