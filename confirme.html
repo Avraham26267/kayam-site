@@ -40,11 +40,23 @@ const fr = (navigator.language || "fr").slice(0, 2) === "fr";
 const params = new URLSearchParams(location.search + "&" + location.hash.slice(1));
 const failed = params.has("error") || params.has("error_code");
 const $ = id => document.getElementById(id);
+// Le lien contient un code de connexion : on le passe à l'app (kayam://auth-callback), qui connecte directement.
+// Il ne marche que dans l'app qui a créé le compte (sur cet iPhone).
+const code = params.get("code");
+const onPhone = /iPhone|iPad|iPod/.test(navigator.userAgent);
+if (code && !failed) {
+  const appURL = "kayam://auth-callback?code=" + encodeURIComponent(code);
+  $("b").href = appURL;
+  if (onPhone) setTimeout(() => { location.href = appURL; }, 400);
+  else $("s").textContent = fr
+    ? "Ouvre Kayam sur ton iPhone et connecte-toi avec ton e-mail et ton mot de passe."
+    : "Open Kayam on your iPhone and sign in with your email and password.";
+}
 if (failed) {
   $("t").innerHTML = fr ? 'Ce lien a <span class="s">expiré.</span>' : 'This link has <span class="s">expired.</span>';
   $("s").textContent = fr
-    ? "Il a peut-être déjà servi : essaie d'abord de te connecter dans Kayam. Si ça ne marche pas, recrée ton compte dans l'app pour recevoir un nouveau lien."
-    : "It may have been used already: first try signing in to Kayam. If that doesn't work, create your account again in the app to get a new link.";
+    ? "Il a peut-être déjà servi : essaie d'abord de te connecter dans Kayam. Sinon, touche « Renvoyer l'e-mail » dans l'app pour recevoir un nouveau lien."
+    : "It may have been used already: first try signing in to Kayam. Otherwise, tap \"Send the email again\" in the app to get a new link.";
 }
 if (!fr) {
   document.documentElement.lang = "en";
@@ -56,8 +68,8 @@ if (!fr) {
   $("b").textContent = "Open Kayam";
   $("flink1").textContent = "Privacy";
 }
-// Le jeton de connexion éventuel ne doit pas rester dans l'adresse
-if (location.hash) history.replaceState(null, "", location.pathname + (failed ? "?error=1" : ""));
+// Le code de connexion ne doit pas rester dans l'adresse (ni dans l'historique)
+if (location.hash || code) history.replaceState(null, "", location.pathname + (failed ? "?error=1" : ""));
 </script>
 </body>
 </html>
