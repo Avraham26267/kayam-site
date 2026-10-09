@@ -78,10 +78,20 @@
   .grid3 button { all:unset; cursor:pointer; position:relative; aspect-ratio:3/4; background:#DDE3D4; }
   .grid3 img { width:100%; height:100%; object-fit:cover; display:block; }
   .grid3 span { position:absolute; left:8px; bottom:8px; background:rgba(17,22,15,.7); color:#fff; font-size:12px; font-weight:700; border-radius:99px; padding:3px 9px; }
-  .lightbox { position:fixed; inset:0; z-index:50; background:rgba(11,15,12,.94); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
-  .lightbox img { max-width:100%; max-height:80vh; border-radius:18px; }
-  .lightbox p { color:#F2F5EE; font-weight:700; margin:14px 0 0; text-align:center; }
-  .lbclose { position:absolute; top:18px; right:18px; width:44px; height:44px; border-radius:50%; border:0; background:rgba(255,255,255,.14); color:#fff; font-size:18px; cursor:pointer; }
+  .grid3 .n { left:auto; right:8px; background:var(--lime); color:var(--dark); }
+  .lightbox { position:fixed; inset:0; z-index:50; background:rgba(11,15,12,.98); overflow-y:auto; overscroll-behavior:contain; }
+  .lbbody { max-width:560px; margin:0 auto; padding:72px 16px 32px; }
+  .strip { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
+  .strip::-webkit-scrollbar { display:none; }
+  .strip img { flex:0 0 100%; width:100%; height:62vh; object-fit:contain; cursor:pointer; border-radius:18px; scroll-snap-align:center; background:#1B2119; }
+  .dots { display:flex; justify-content:center; gap:6px; margin:12px 0 0; }
+  .dots i { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.3); }
+  .dots i.on { background:var(--lime); }
+  .lbhead { color:#F2F5EE; margin:18px 0 12px; }
+  .lbhead b { display:block; font-size:22px; } .lbhead span { color:#A9B4A2; font-size:15px; }
+  .lbbody .box { margin:0; }
+  .lbbody .box .ex:first-of-type { border-top:0; }
+  .lbclose { position:fixed; z-index:2; top:18px; right:18px; width:44px; height:44px; border-radius:50%; border:0; background:rgba(255,255,255,.14); color:#fff; font-size:18px; cursor:pointer; }
   .box { background:var(--white); border-radius:24px; padding:20px; margin-bottom:14px; box-shadow:0 1px 0 var(--line), 0 10px 30px rgba(17,22,15,.06); }
   .box h2 { font-size:20px; margin:0 0 4px; } .box .lead { color:var(--sage); margin:0 0 12px; font-size:15px; }
   .box .lead b { color:var(--dark); }
@@ -153,8 +163,7 @@
 </main>
 <div class="lightbox hidden" id="lightbox" role="dialog" aria-modal="true">
   <button class="lbclose" id="lbclose" aria-label="Fermer">✕</button>
-  <img id="lbimg" alt="">
-  <p id="lbtext"></p>
+  <div class="lbbody" id="lbbody"></div>
 </div>
 
 <footer>
@@ -316,7 +325,7 @@ const A = fr ? {
   weightTitle:"Ton poids", weightLead:(a, b, d) => `<b>${a} → ${b}</b> (${d}) depuis ta première pesée.`, noWeight:"Pèse-toi dans l'app (Profil → Objectif) : ta courbe apparaîtra ici.",
   measTitle:"Tes mensurations", noMeas:"Ajoute tes mensurations dans l'app (Progrès → Corps).",
   parts:{waist:"Tour de taille", chest:"Poitrine", arm:"Bras", thigh:"Cuisse", hips:"Hanches"}, sets:"séries", ex:"exercices", min:"min", since:"depuis le début",
-  exported:"Exporter mes données"
+  exported:"Exporter mes données", nPhotos:n => n > 1 ? `${n} photos` : "1 photo", noSession:"Séance introuvable (supprimée dans l'app ?)", inSession:"Dans cette séance"
 } : {
   sessions:"workouts", photos:"photos", records:"records", week:"This week", thisWeek:"this week",
   goal:{"Build muscle":"Building muscle","Lose fat":"Losing fat","Get stronger":"Recomposition"},
@@ -330,7 +339,7 @@ const A = fr ? {
   weightTitle:"Your weight", weightLead:(a, b, d) => `<b>${a} → ${b}</b> (${d}) since your first weigh-in.`, noWeight:"Weigh yourself in the app (Profile → Goal): your curve will show up here.",
   measTitle:"Your measurements", noMeas:"Add your measurements in the app (Progress → Body).",
   parts:{waist:"Waist", chest:"Chest", arm:"Arm", thigh:"Thigh", hips:"Hips"}, sets:"sets", ex:"exercises", min:"min", since:"since the start",
-  exported:"Export my data"
+  exported:"Export my data", nPhotos:n => n > 1 ? `${n} photos` : "1 photo", noSession:"Workout not found (deleted in the app?)", inSession:"In this workout"
 };
 if (!fr) Object.assign(EN_UI, { tPhotos:"Photos", tBilan:"Summary", tCorps:"Body", exportBtn:"Export my data" });
 if (!fr) document.querySelectorAll("#accountView [data-t]").forEach(e => { if (EN_UI[e.dataset.t]) e.textContent = EN_UI[e.dataset.t]; });
@@ -452,21 +461,67 @@ function photosTab(p) {
     const kg = a && b && a !== b ? `${signed(w(b.kg) - w(a.kg))} ${unit()}` : "";
     p.append(el("p", "bainfo", A.apart(A.weeks(weeks), kg)));
   }
+  // Une case par séance : les photos prises pendant la même séance sont ensemble
   const grid = el("div", "grid3");
-  for (const photo of ph) {
-    const b = el("button"), url = photoURL(photo);
+  for (const group of photoGroups()) {
+    const b = el("button"), cover = group[0], url = photoURL(cover);
     if (url) { const i = el("img"); i.src = url; i.alt = ""; i.loading = "lazy"; b.append(i); }
-    b.append(el("span", null, appDate(photo.date).toLocaleDateString(locale, { day: "numeric", month: "short" })));
-    b.addEventListener("click", () => openPhoto(photo));
+    b.append(el("span", null, appDate(cover.date).toLocaleDateString(locale, { day: "numeric", month: "short" })));
+    if (group.length > 1) b.append(el("span", "n", String(group.length)));
+    b.addEventListener("click", () => openSession(group));
     grid.append(b);
   }
   p.append(grid);
 }
-function openPhoto(photo) {
-  const url = photoURL(photo); if (!url) return;
-  const s = state.history.find(x => x.id === photo.sessionID);
-  $("lbimg").src = url;
-  $("lbtext").textContent = [appDate(photo.date).toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" }), s?.name].filter(Boolean).join(" · ");
+function photoGroups() {
+  const groups = new Map();
+  for (const photo of state.photos) {
+    const key = photo.sessionID || "day-" + appDate(photo.date).toDateString();
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(photo);
+  }
+  return [...groups.values()].map(g => g.slice().sort((a, b) => a.date - b.date));
+}
+// Les exercices d'une séance, série par série (aussi dans "Dernières séances")
+function sessionExercises(s, into) {
+  for (const e of s.exercises || []) {
+    const work = (e.sets || []).filter(isWork); if (!work.length) continue;
+    const ex = el("div", "ex");
+    ex.append(el("b", null, exName(e.exerciseName)), el("span", null, work.map(x => x.kg ? `${num(w(x.kg), 1)} × ${x.reps ?? "–"}` : x.seconds ? `${Math.round(x.seconds / 60)} ${A.min}` : `× ${x.reps ?? "–"}`).join(" · ")));
+    into.append(ex);
+  }
+}
+const sessionLine = s => {
+  const nSets = (s.exercises || []).reduce((a, e) => a + (e.sets || []).filter(isWork).length, 0);
+  const mins = Math.max(1, Math.round((appDate(s.endedAt) - appDate(s.startedAt)) / 60000));
+  return `${mins} ${A.min} · ${nSets} ${A.sets}`;
+};
+// Toucher une case : toutes les photos de la séance (glisser), puis la séance elle-même
+function openSession(group) {
+  const body = $("lbbody"); body.replaceChildren();
+  const strip = el("div", "strip"), dots = el("div", "dots");
+  for (const photo of group) {
+    const url = photoURL(photo); if (!url) continue;
+    const i = el("img"); i.src = url; i.alt = ""; strip.append(i); dots.append(el("i"));
+    // Toucher la photo : la suivante (sur ordinateur, pas besoin de glisser)
+    i.addEventListener("click", () => strip.scrollBy({ left: strip.clientWidth, behavior: "smooth" }));
+  }
+  body.append(strip);
+  if (dots.children.length > 1) {
+    dots.children[0].classList.add("on"); body.append(dots);
+    strip.addEventListener("scroll", () => {
+      const k = Math.round(strip.scrollLeft / strip.clientWidth);
+      [...dots.children].forEach((d, j) => d.classList.toggle("on", j === k));
+    }, { passive: true });
+  }
+  const s = state.history.find(x => x.id === group[0].sessionID);
+  const head = el("div", "lbhead");
+  head.append(el("b", null, s?.name || appDate(group[0].date).toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })),
+    el("span", null, [appDate(group[0].date).toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" }), s ? sessionLine(s) : null, A.nPhotos(group.length)].filter(Boolean).join(" · ")));
+  body.append(head);
+  if (s) { const b = box(A.inSession); sessionExercises(s, b); body.append(b); }
+  else if (group[0].sessionID) body.append(el("p", "note", A.noSession));
+  $("lightbox").scrollTop = 0;
   $("lightbox").classList.remove("hidden");
 }
 const closePhoto = () => $("lightbox").classList.add("hidden");
@@ -590,15 +645,8 @@ function bilanTab(p) {
     const b5 = box(A.recent);
     for (const s of state.history.slice(0, 10)) {
       const r = el("div", "srow"), h = el("div", "h"), d = el("div", "d");
-      const nSets = (s.exercises || []).reduce((a, e) => a + (e.sets || []).filter(isWork).length, 0);
-      const mins = Math.max(1, Math.round((appDate(s.endedAt) - appDate(s.startedAt)) / 60000));
-      h.append(el("b", null, s.name || "—"), el("span", null, `${day(appDate(s.startedAt))} · ${mins} ${A.min} · ${nSets} ${A.sets}`));
-      for (const e of s.exercises || []) {
-        const work = (e.sets || []).filter(isWork); if (!work.length) continue;
-        const ex = el("div", "ex");
-        ex.append(el("b", null, exName(e.exerciseName)), el("span", null, work.map(x => x.kg ? `${num(w(x.kg), 1)} × ${x.reps ?? "–"}` : x.seconds ? `${Math.round(x.seconds / 60)} ${A.min}` : `× ${x.reps ?? "–"}`).join(" · ")));
-        d.append(ex);
-      }
+      h.append(el("b", null, s.name || "—"), el("span", null, `${day(appDate(s.startedAt))} · ${sessionLine(s)}`));
+      sessionExercises(s, d);
       r.append(h, d); r.addEventListener("click", () => r.classList.toggle("open"));
       b5.append(r);
     }
