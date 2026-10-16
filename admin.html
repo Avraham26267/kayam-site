@@ -192,7 +192,7 @@
         <p class="lead">Pour vérifier que tout est bien mesuré. Une ligne sans jetons = Claude n'a pas répondu (erreur).</p>
         <div class="scroll"><table id="latestTable"></table></div>
       </section>
-      <p class="note">La facture officielle, au centime : <a href="https://console.anthropic.com/settings/usage" target="_blank" rel="noopener">console Anthropic → Usage</a>. Ici, le coût est calculé avec les prix publics (Haiku 5.5 : 0,10 $ / 0,50 $ par million de jetons lus / écrits ; Opus 5.5 : 4 $ / 20 $).</p>
+      <p class="note">Coût calculé avec les jetons exacts de chaque appel × les prix publics (Haiku 5.5 : 0,10 $ / 0,50 $ par million de jetons lus / écrits ; Opus 5.5 : 4 $ / 20 $).</p>
     </div>
 
     <!-- PERSONNES -->
@@ -254,7 +254,7 @@
   </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script>
 const sb = supabase.createClient("https://ezkyuvdndslkoeiegorg.supabase.co", "sb_publishable_aYej0xP8FtfrjFsFMa6vFA_ISKcyu9I");
 const $ = id => document.getElementById(id);
