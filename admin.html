@@ -129,7 +129,7 @@ const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls)
 const num = v => Number(v || 0).toLocaleString("fr-FR");
 const date = t => new Date(t).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 // Seulement pour les anciens appels (avant la mesure exacte) : prix moyen estimé d'un appel
-const OLD_ESTIMATE = { voice: 0.000115, coach: 0.01 };
+const OLD_ESTIMATE = { voice: 0.000115, coach: 0.01, photo: 0.0003 };
 
 // Un prix en dollars, lisible même tout petit : « 0,000412 $ (0,04 centime) »
 function usd(v) {
@@ -246,9 +246,11 @@ function render(d) {
   $("ai").replaceChildren(
     aiCard("Repas à la voix", d.ai.voice, "repas", "repas", OLD_ESTIMATE.voice),
     aiCard("Notes du coach", d.ai.coach, "note", "notes", OLD_ESTIMATE.coach),
+    ...(d.ai.photo ? [aiCard("Repas en photo", d.ai.photo, "photo", "photos", OLD_ESTIMATE.photo)] : []),
   );
-  const month = Number(d.ai.voice.cost_month) + Number(d.ai.coach.cost_month);
-  const all = Number(d.ai.voice.cost_total) + Number(d.ai.coach.cost_total);
+  const parts = [d.ai.voice, d.ai.coach, d.ai.photo].filter(Boolean);
+  const month = parts.reduce((sum, a) => sum + Number(a.cost_month), 0);
+  const all = parts.reduce((sum, a) => sum + Number(a.cost_total), 0);
   $("aiTotal").replaceChildren(
     document.createTextNode("Total IA ces 30 jours : "), el("b", null, usd(month) + cents(month)),
     document.createTextNode(" · depuis le début : "), el("b", null, usd(all) + cents(all)),
