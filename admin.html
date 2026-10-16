@@ -48,6 +48,24 @@
   .gate { text-align:center; padding:60px 0; }
   .gate p { color:var(--sage); font-size:17px; }
   .note { color:var(--sage); font-size:13px; margin:10px 0 0; }
+  /* Des phrases plutôt que des cases : le chiffre en gras, puis ce qu'il veut dire */
+  .lines { list-style:none; margin:0; padding:0; }
+  .lines li { display:flex; align-items:baseline; gap:14px; padding:12px 0; border-bottom:1px solid var(--line); font-size:17px; }
+  .lines li:last-child { border-bottom:0; }
+  .lines li b { min-width:92px; font-size:26px; font-weight:900; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .lines li small { display:block; color:var(--sage); font-size:13px; margin-top:2px; }
+  .hero { background:var(--card); color:var(--white); border-radius:26px; padding:22px; margin:22px 0 18px; }
+  .hero .lines li { border-color:rgba(255,255,255,.12); }
+  .hero .lines li b { color:var(--lime); }
+  .hero .lines li small { color:rgba(255,255,255,.6); }
+  .ai2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .ai2 > div { background:var(--cream); border-radius:20px; padding:16px 18px; }
+  .ai2 h3 { margin:0 0 2px; font-size:18px; }
+  .ai2 .lines li { font-size:15px; padding:9px 0; }
+  .ai2 .lines li b { min-width:0; font-size:17px; }
+  .total { margin:16px 0 0; padding:14px 18px; border-radius:18px; background:var(--dark); color:var(--white); font-size:17px; }
+  .total b { color:var(--lime); }
+  @media (max-width:760px) { .ai2 { grid-template-columns:1fr; } }
   @media (max-width:760px) { .grid { grid-template-columns:repeat(2, minmax(0,1fr)); } .report { flex-direction:column; } }
 </style>
 </head>
@@ -65,7 +83,7 @@
   </div>
 
   <div class="hidden" id="panel">
-    <div class="grid" id="tiles"></div>
+    <div class="hero"><ul class="lines" id="summary"></ul></div>
 
     <section class="box" id="reportsBox">
       <h2>Signalements à traiter</h2>
@@ -81,9 +99,10 @@
     </section>
 
     <section class="box">
-      <h2>IA</h2>
-      <p class="lead">Repas à la voix (Claude Haiku) et notes du coach. Coût estimé à partir du nombre d'appels, la vraie facture est dans la console Anthropic.</p>
-      <div class="row" id="ai"></div>
+      <h2>Ce que coûte l'IA</h2>
+      <p class="lead">Le vrai prix de chaque appel, calculé avec ce que Claude a vraiment lu et écrit (prix officiels d'Anthropic). La facture exacte, au centime : <a href="https://console.anthropic.com/settings/usage" target="_blank" rel="noopener">console Anthropic → Usage</a>.</p>
+      <div class="ai2" id="ai"></div>
+      <p class="total" id="aiTotal"></p>
     </section>
 
     <section class="box">
@@ -94,7 +113,7 @@
 
     <section class="box">
       <h2>Communauté</h2>
-      <div class="row" id="community"></div>
+      <ul class="lines" id="community"></ul>
     </section>
 
     <p class="note">Les abonnements Pro et les revenus sont dans App Store Connect (Ventes et tendances), pas ici.</p>
@@ -109,8 +128,34 @@ const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const num = v => Number(v || 0).toLocaleString("fr-FR");
 const date = t => new Date(t).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-// Coût estimé par appel (prix publics) : voix sur Haiku 5.5 ≈ 0,0001 $, note du coach sur Opus 5.5 ≈ 0,01 $
-const COST = { voice: 0.000115, coach: 0.01 };
+// Seulement pour les anciens appels (avant la mesure exacte) : prix moyen estimé d'un appel
+const OLD_ESTIMATE = { voice: 0.000115, coach: 0.01 };
+
+// Un prix en dollars, lisible même tout petit : « 0,000412 $ (0,04 centime) »
+function usd(v) {
+  v = Number(v || 0);
+  if (v === 0) return "0 $";
+  const dollars = v >= 1
+    ? v.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : v.toLocaleString("fr-FR", { maximumSignificantDigits: 3 });
+  return dollars + " $";
+}
+function cents(v) {
+  v = Number(v || 0) * 100;
+  if (v === 0) return "";
+  return " (" + (v >= 1 ? v.toLocaleString("fr-FR", { maximumFractionDigits: 2 }) : v.toLocaleString("fr-FR", { maximumSignificantDigits: 2 })) + " centime" + (v >= 2 ? "s" : "") + ")";
+}
+const word = (n, one, many) => (Number(n) > 1 ? many : one);
+const plural = (n, one, many) => num(n) + " " + word(n, one, many);
+
+// Une ligne : le chiffre en gras, la phrase, une petite précision dessous
+function line(value, text, detail) {
+  const li = el("li");
+  const words = el("div", null, text);
+  if (detail) words.append(el("small", null, detail));
+  li.append(el("b", null, value), words);
+  return li;
+}
 
 function gate(text, showLink) {
   $("panel").classList.add("hidden");
@@ -118,12 +163,6 @@ function gate(text, showLink) {
   $("gate").classList.remove("hidden");
   $("gateText").textContent = text;
   $("gateLink").classList.toggle("hidden", !showLink);
-}
-
-function tile(value, label, dark) {
-  const t = el("div", "tile" + (dark ? " dark" : ""));
-  t.append(el("b", null, value), el("span", null, label));
-  return t;
 }
 
 async function load() {
@@ -144,12 +183,12 @@ async function load() {
 }
 
 function render(d) {
-  const open = d.reports.length;
-  $("tiles").replaceChildren(
-    tile(num(d.users.total), "Comptes", true),
-    tile("+" + num(d.users.week), "Cette semaine"),
-    tile(num(d.users.active_week), "Actifs 7 jours"),
-    tile(num(d.waitlist.total), "Liste d'attente"),
+  const u = d.users;
+  $("summary").replaceChildren(
+    line(num(u.total), word(u.total, "compte Kayam au total", "comptes Kayam au total")),
+    line("+" + num(u.week), "nouveaux comptes ces 7 derniers jours", "dont " + num(u.today) + " aujourd'hui · " + num(u.month) + " sur 30 jours"),
+    line(num(u.active_week), word(u.active_week, "personne s'est connectée ces 7 derniers jours", "personnes se sont connectées ces 7 derniers jours"), "Connexion au compte, pas forcément une séance"),
+    line(num(d.waitlist.total), word(d.waitlist.total, "personne sur la liste d'attente", "personnes sur la liste d'attente")),
   );
 
   // Signalements
@@ -185,14 +224,34 @@ function render(d) {
   }));
   $("days").replaceChildren(...d.users.by_day.map(x => el("span", null, new Date(x.day).toLocaleDateString("fr-FR", { day: "numeric" }))));
 
-  // IA
-  const cost = d.ai.voice_month * COST.voice + d.ai.coach_month * COST.coach;
+  // IA : le vrai coût, période par période
+  const aiCard = (title, a, what, whats, estimate) => {
+    const box = el("div");
+    box.append(el("h3", null, title));
+    const ul = el("ul", "lines");
+    ul.append(
+      line(num(a.today), word(a.today, what, whats) + " aujourd'hui", "Coût : " + usd(a.cost_today) + cents(a.cost_today)),
+      line(num(a.week), word(a.week, what, whats) + " ces 7 jours", "Coût : " + usd(a.cost_week) + cents(a.cost_week) + " · " + plural(a.users_week, "personne", "personnes")),
+      line(num(a.month), word(a.month, what, whats) + " ces 30 jours", "Coût : " + usd(a.cost_month) + cents(a.cost_month)),
+      line(num(a.total), word(a.total, what, whats) + " depuis le début", "Coût : " + usd(a.cost_total) + cents(a.cost_total)),
+    );
+    const measured = a.total - a.unmeasured_total;
+    if (measured > 0) ul.append(line(usd(a.cost_total / measured), "en moyenne par " + what, cents(a.cost_total / measured).replace(/[()]/g, "").trim()));
+    box.append(ul);
+    if (a.unmeasured_total > 0) {
+      box.append(el("p", "note", plural(a.unmeasured_total, "appel plus ancien n'a", "appels plus anciens n'ont") + " pas de coût mesuré (avant la mesure exacte, ou en erreur). Estimation pour eux : ≈ " + usd(a.unmeasured_total * estimate) + "."));
+    }
+    return box;
+  };
   $("ai").replaceChildren(
-    tile(num(d.ai.voice_today), "Voix aujourd'hui"),
-    tile(num(d.ai.voice_week), "Voix 7 jours"),
-    tile(num(d.ai.voice_users_week), "Utilisateurs voix 7 j"),
-    tile(num(d.ai.coach_week), "Notes coach 7 j"),
-    tile(cost.toLocaleString("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 }), "Coût estimé 30 j"),
+    aiCard("Repas à la voix", d.ai.voice, "repas", "repas", OLD_ESTIMATE.voice),
+    aiCard("Notes du coach", d.ai.coach, "note", "notes", OLD_ESTIMATE.coach),
+  );
+  const month = Number(d.ai.voice.cost_month) + Number(d.ai.coach.cost_month);
+  const all = Number(d.ai.voice.cost_total) + Number(d.ai.coach.cost_total);
+  $("aiTotal").replaceChildren(
+    document.createTextNode("Total IA ces 30 jours : "), el("b", null, usd(month) + cents(month)),
+    document.createTextNode(" · depuis le début : "), el("b", null, usd(all) + cents(all)),
   );
 
   // Liste d'attente
@@ -205,10 +264,11 @@ function render(d) {
   }) : [(() => { const tr = el("tr"); const td = el("td", "muted", "Personne pour l'instant."); td.colSpan = 3; tr.append(td); return tr; })()]));
 
   // Communauté
+  const c = d.community;
   $("community").replaceChildren(
-    tile(num(d.community.in_circles), "Dans un cercle"),
-    tile(num(d.community.friendships), "Amitiés"),
-    tile(num(d.community.shared_photos), "Photos partagées"),
+    line(num(c.in_circles), word(c.in_circles, "personne a ouvert son cercle d'amis", "personnes ont ouvert leur cercle d'amis")),
+    line(num(c.friendships), word(c.friendships, "amitié", "amitiés"), "Deux personnes reliées = 1 amitié"),
+    line(num(c.shared_photos), word(c.shared_photos, "photo partagée avec des amis", "photos partagées avec des amis")),
   );
 }
 
