@@ -106,6 +106,12 @@
     </section>
 
     <section class="box">
+      <h2>Aliments introuvables</h2>
+      <p class="lead">Ce que les gens disent ou prennent en photo et que Kayam ne connaît pas encore (30 derniers jours, anonyme). Les plus demandés sont à ajouter en premier.</p>
+      <ul class="lines" id="misses"></ul>
+    </section>
+
+    <section class="box">
       <h2>Liste d'attente</h2>
       <p class="lead" id="waitLead"></p>
       <table><thead><tr><th>E-mail</th><th>Langue</th><th>Date</th></tr></thead><tbody id="wait"></tbody></table>
@@ -178,6 +184,7 @@ async function load() {
   $("gate").classList.add("hidden");
   $("panel").classList.remove("hidden");
   $("refresh").classList.remove("hidden");
+  loadMisses();
   $("when").textContent = "Mis à jour à " + new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   render(data);
 }
@@ -272,6 +279,20 @@ function render(d) {
     line(num(c.friendships), word(c.friendships, "amitié", "amitiés"), "Deux personnes reliées = 1 amitié"),
     line(num(c.shared_photos), word(c.shared_photos, "photo partagée avec des amis", "photos partagées avec des amis")),
   );
+}
+
+// Les « ratés » (table food_misses) : si la table n'existe pas encore, on le dit simplement
+async function loadMisses() {
+  const { data, error } = await sb.rpc("admin_food_misses");
+  if (error) {
+    $("misses").replaceChildren(el("li", "empty", "Pas encore disponible (Tools/food_misses.sql à lancer dans Supabase)."));
+    return;
+  }
+  if (!data.length) {
+    $("misses").replaceChildren(el("li", "empty", "Rien pour l'instant : tout ce qui est dit est trouvé. 👌"));
+    return;
+  }
+  $("misses").replaceChildren(...data.map(m => line(num(m.count) + "×", "« " + m.query + " »", m.lang.toUpperCase())));
 }
 
 $("refresh").addEventListener("click", load);
