@@ -329,6 +329,10 @@ function show(signedIn) {
 }
 
 sb.auth.onAuthStateChange((_event, session) => {
+  // Connexion Google lancée depuis le panneau admin : on y retourne (moins de 10 minutes)
+  let backToAdmin = 0;
+  try { backToAdmin = Number(localStorage.getItem("kayamBackToAdmin")) || 0; } catch {}
+  if (session && Date.now() - backToAdmin < 10 * 60 * 1000) { location.replace("admin.html"); return; }
   if (session) { show(true); if (!state) load(session.user); }
   else show(false);
 });
