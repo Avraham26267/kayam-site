@@ -22,7 +22,7 @@
 
 <section id="fr" lang="fr">
   <h1>Politique de confidentialité</h1>
-  <p class="muted">Dernière mise à jour : 11 octobre 2026</p>
+  <p class="muted">Dernière mise à jour : 16 octobre 2026</p>
 
   <div class="card">
     <strong>En bref</strong>
@@ -30,6 +30,7 @@
       <li>Pas de publicité, pas de pistage, pas de revente de données. Jamais.</li>
       <li>Tes repas, tes séances, tes pesées et tes photos sont sur ton téléphone. Avec un compte, une copie <strong>privée</strong> est gardée en ligne (Supabase) pour tout retrouver sur un nouveau téléphone. Personne d'autre ne peut la lire.</li>
       <li>Tes amis ne voient que ce que tu choisis de partager. Jamais ton poids, et une photo seulement si tu la partages toi-même, une par une.</li>
+      <li>Repas à la voix ou en photo (Kayam Pro) : seulement avec ton accord, la phrase ou la photo est envoyée à Claude (Anthropic) pour être comprise, sans ton nom ni ton compte. Kayam ne la garde pas.</li>
       <li>Tu peux exporter toutes tes données et supprimer ton compte depuis l'app, à tout moment.</li>
     </ul>
   </div>
@@ -58,8 +59,10 @@
   <ul>
     <li><strong>Supabase</strong> : hébergement du compte, du profil, du cercle d'amis, de la copie de sauvegarde (carnets et photos, espace privé) et de la liste d'attente, avec accès protégé (chacun ne voit que ses propres données et celles que ses amis partagent).</li>
     <li><strong>Google Sign-In</strong> : seulement si tu choisis « Continuer avec Google ».</li>
+    <li><strong>Table Ciqual (ANSES)</strong> : les valeurs nutritionnelles de nombreux aliments viennent de la table Ciqual 2025 de l'ANSES (licence ouverte Etalab 2.0), intégrée à l'app. Aucune donnée n'est envoyée.</li>
     <li><strong>Open Food Facts</strong> : quand tu scannes un code-barres ou cherches un produit, le code-barres ou le texte recherché (et ton pays choisi) est envoyé à Open Food Facts. Aucune donnée personnelle n'est envoyée.</li>
-    <li><strong>Apple</strong> : notifications locales et Live Activities, gérées par ton iPhone.</li>
+    <li><strong>Anthropic (Claude)</strong> : seulement si tu l'acceptes (demandé une fois, modifiable dans Profil → Préférences → IA), pour les repas dits à la voix ou pris en photo (Kayam Pro). La phrase dite ou la photo de l'assiette (réduite) passe par notre serveur et est envoyée à Claude, qui renvoie la liste des aliments et des quantités. Ton nom, ton e-mail et ton compte ne sont jamais envoyés. Kayam ne garde ni la phrase ni la photo ; Anthropic ne les utilise pas pour entraîner ses modèles et les supprime sous 30 jours. Pour limiter l'usage par jour, Kayam enregistre seulement la date de chaque demande, liée à ton compte, avec sa taille et son coût. Les calories viennent toujours de la base d'aliments de Kayam. Quand un aliment dit ou photographié n'est pas trouvé, seul ce mot (par exemple « camembert ») est enregistré, de façon anonyme, sans lien avec ton compte, pour ajouter les aliments qui manquent.</li>
+    <li><strong>Apple</strong> : notifications locales et Live Activities, gérées par ton iPhone. La dictée du repas à la voix utilise la reconnaissance vocale d'Apple.</li>
   </ul>
   <p>Aucun outil de publicité, de mesure d'audience ou de pistage n'est utilisé.</p>
 
@@ -93,7 +96,7 @@
 
 <section id="en" lang="en">
   <h1>Privacy Policy</h1>
-  <p class="muted">Last updated: October 11, 2026</p>
+  <p class="muted">Last updated: October 16, 2026</p>
 
   <div class="card">
     <strong>In short</strong>
@@ -101,6 +104,7 @@
       <li>No ads, no tracking, no selling of data. Ever.</li>
       <li>Your meals, workouts, weigh-ins and photos are on your phone. With an account, a <strong>private</strong> copy is kept online (Supabase) so you get everything back on a new phone. Nobody else can read it.</li>
       <li>Your friends only see what you choose to share. Never your weight, and a photo only if you share it yourself, one at a time.</li>
+      <li>Meals by voice or photo (Kayam Pro): only with your consent, the sentence or the photo is sent to Claude (Anthropic) to be understood, without your name or account. Kayam doesn't keep it.</li>
       <li>You can export all your data and delete your account from the app at any time.</li>
     </ul>
   </div>
@@ -129,8 +133,10 @@
   <ul>
     <li><strong>Supabase</strong>: hosting of your account, profile, friends circle, backup copy (logs and photos, private space) and the waitlist, with protected access (everyone only sees their own data and what their friends share).</li>
     <li><strong>Google Sign-In</strong>: only if you choose "Continue with Google".</li>
+    <li><strong>Ciqual table (ANSES)</strong>: nutrition values for many foods come from ANSES's Ciqual 2025 table (Etalab 2.0 open licence), built into the app. No data is sent.</li>
     <li><strong>Open Food Facts</strong>: when you scan a barcode or search a product, the barcode or search text (and your chosen country) is sent to Open Food Facts. No personal data is sent.</li>
-    <li><strong>Apple</strong>: local notifications and Live Activities, handled by your iPhone.</li>
+    <li><strong>Anthropic (Claude)</strong>: only if you agree (asked once, can be changed in Profile → Preferences → AI), for meals said out loud or photographed (Kayam Pro). The spoken sentence or the (resized) photo of your plate goes through our server to Claude, which returns the list of foods and amounts. Your name, email and account are never sent. Kayam keeps neither the sentence nor the photo; Anthropic doesn't use them to train its models and deletes them within 30 days. To limit daily use, Kayam only records the date of each request, linked to your account, with its size and cost. Calories always come from Kayam's food database. When a food said or photographed isn't found, only that word (for example "camembert") is stored, anonymously, with no link to your account, so we can add missing foods.</li>
+    <li><strong>Apple</strong>: local notifications and Live Activities, handled by your iPhone. Saying a meal out loud uses Apple's speech recognition.</li>
   </ul>
   <p>No advertising, analytics or tracking tools are used.</p>
 
