@@ -162,6 +162,12 @@
       </div>
       <div class="grid" id="aiTiles"></div>
       <section class="box">
+        <h2>Combien coûte une personne</h2>
+        <p class="lead">Calculé avec le coût moyen RÉEL d'un appel (depuis le début). « Normal » = un usage typique ; « Au maximum » = quelqu'un qui atteint ses limites tous les jours.</p>
+        <div class="scroll"><table id="perUserTable"></table></div>
+        <p class="note" id="perUserNote"></p>
+      </section>
+      <section class="box">
         <h2>Par fonction</h2>
         <p class="lead">Chiffres exacts renvoyés par Claude à chaque appel. « Jetons lus » = ce qu'on envoie (consigne + phrase ou photo), « jetons écrits » = sa réponse.</p>
         <div class="scroll"><table id="aiTable"></table></div>
@@ -184,7 +190,7 @@
       </section>
       <section class="box">
         <h2>Limites atteintes</h2>
-        <p class="lead">Combien de fois quelqu'un a atteint la limite du jour (50 phrases, 20 photos, 3 notes du coach), 30 derniers jours.</p>
+        <p class="lead">Combien de fois quelqu'un a atteint la limite du jour (20 phrases, 10 photos, 2 notes du coach), 30 derniers jours.</p>
         <div id="limits"></div>
       </section>
       <section class="box">
@@ -483,8 +489,30 @@ function renderAITotals() {
     : "Tous les appels de cette période sont mesurés. ✓";
 }
 
+// Limites par jour (les mêmes que Tools/security_fix.sql) et usage « normal » estimé
+const LIMITS = { voice: 20, photo: 10, coach: 2 };
+const NORMAL = { voice: 3, photo: 2, coach: 0.3 };
+const NET_PER_MONTH = 3.5; // abonnement 4,99 € → ~3,50 $ après TVA et Apple (ordre de grandeur)
+function renderPerUser() {
+  const all = AI.totals.filter(t => t.period === "all");
+  const avg = f => { const r = all.find(t => t.feature === f); return r && r.measured ? Number(r.cost) / r.measured : null; };
+  let normal = 0, max = 0, missing = [];
+  const rows = ["voice", "photo", "coach"].map(f => {
+    const a = avg(f);
+    if (a == null) { missing.push(FEATURES[f]); return [tag(f), "pas encore mesuré", num(LIMITS[f]), "—", "—", "—"]; }
+    normal += a * NORMAL[f] * 30; max += a * LIMITS[f] * 30;
+    return [tag(f), usd(a) + " (" + num(Math.round(1 / a)) + " appels = 1 $)", num(LIMITS[f]), usd(a * LIMITS[f]), usd(a * NORMAL[f] * 30), usd(a * LIMITS[f] * 30)];
+  });
+  table("perUserTable", ["Fonction", "Prix d'un appel", "#Limite / jour", "#Max / jour", "#Normal / mois", "#Au maximum / mois"], rows,
+    ["Total par personne", "", "", "", usd(normal), usd(max)]);
+  $("perUserNote").textContent = (missing.length ? "Pas encore de mesure pour : " + missing.join(", ") + ". " : "") +
+    "Un abonné rapporte environ " + usd(NET_PER_MONTH) + " par mois. Usage normal : " + usd(normal) + " (" + Math.round(normal / NET_PER_MONTH * 100) + " % de ce qu'il rapporte). " +
+    "Au maximum : " + usd(max) + " (" + Math.round(max / NET_PER_MONTH * 100) + " %)." + (max > NET_PER_MONTH ? " ⚠️ Au maximum, il coûte plus qu'il ne rapporte : baisser les limites." : " ✓ Même au maximum, il reste rentable.");
+}
+
 function renderAI() {
   renderAITotals();
+  renderPerUser();
   const d = AI.daily;
   bars("aiBars", "aiAxis", d.map(x => Number(x.input_tokens) + Number(x.output_tokens)), d.map((x, i) => i % 3 === 0 ? String(Number(x.day.slice(8))) : ""), short);
   table("dailyTable", ["Jour", "#Voix", "#Photos", "#Coach", "#Personnes", "#Jetons lus", "#Jetons écrits", "#Coût"],
@@ -513,7 +541,8 @@ function renderApp(a) {
   tiles("appTiles", [
     [num(t.used_day), "ont utilisé l'app depuis 24 h", null, true],
     [num(t.used_week), "en 7 jours", pct(t.used_week).trim()],
-    [num(t.used_month), "en 30 jours", pct(t.used_month).trim()],
+    [num(t.used_month), "ont encore l'app", "utilisée ces 30 jours" + pct(t.used_month)],
+    [num(t.total - t.never_saved - t.used_month), "probablement partis", "ont utilisé l'app, plus rien depuis 30 jours" + pct(t.total - t.never_saved - t.used_month)],
     [num(t.never_saved), "n'ont jamais rien sauvegardé", "compte créé puis rien" + pct(t.never_saved)],
     [num(t.with_workout), "ont noté une séance", pct(t.with_workout).trim()],
     [num(t.with_meal), "ont noté un repas", pct(t.with_meal).trim()],
