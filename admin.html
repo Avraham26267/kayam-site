@@ -85,11 +85,60 @@
 
   .report { border:1px solid var(--line); border-radius:18px; padding:14px 16px; margin-bottom:10px; display:flex; gap:14px; align-items:flex-start; justify-content:space-between; }
   .report.late { border-color:#B3261E; background:#FFF6F5; }
+  .report.done { opacity:.6; }
+  .report div:last-child button + button { margin-left:6px; background:transparent; color:var(--dark); border:1px solid var(--line); }
   .report p { margin:4px 0 0; }
   .report .meta { color:var(--sage); font-size:13px; font-weight:700; }
   .report button { border:0; background:var(--dark); color:var(--lime); border-radius:999px; padding:10px 16px; font:inherit; font-weight:800; cursor:pointer; white-space:nowrap; }
 
+  /* Fil d'activité et chronologie */
+  .feed { list-style:none; margin:0; padding:0; }
+  .feed li { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .feed li:last-child { border-bottom:0; }
+  .feed .ic { flex:none; width:34px; height:34px; border-radius:12px; background:var(--cream); display:grid; place-items:center; font-size:16px; }
+  .feed .ic.crash { background:#FDE3E0; } .feed .ic.ai { background:#E6F4C4; } .feed .ic.friend { background:#DCEBFA; } .feed .ic.signup { background:#F6E3C8; } .feed .ic.open { background:var(--dark); }
+  .feed .what { flex:1; min-width:0; }
+  .feed .what b { font-weight:800; }
+  .feed .what small { display:block; color:var(--sage); font-size:12px; font-weight:700; margin-top:2px; }
+  .feed .t { flex:none; color:var(--sage); font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .who { color:var(--dark); font-weight:800; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; font:inherit; }
+  .dayhead { margin:18px 0 4px; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--sage); font-weight:800; }
+  .dayhead:first-child { margin-top:0; }
+  tr.click { cursor:pointer; } tr.click:hover td { background:var(--cream); }
+  .search { width:100%; font:inherit; border:1px solid var(--line); background:var(--cream); border-radius:14px; padding:12px 14px; margin:0 0 12px; }
+  .live { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:800; color:var(--sage); }
+  .live i { width:8px; height:8px; border-radius:50%; background:#2E9E4F; animation:pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity:.25; } }
+
+  /* Fiche d'une personne (par-dessus la page) */
+  .sheet { position:fixed; inset:0; background:rgba(20,24,20,.45); z-index:50; display:flex; justify-content:flex-end; }
+  .sheet .inner { width:min(760px, 100%); height:100%; overflow-y:auto; background:var(--cream); padding:max(22px, env(safe-area-inset-top)) 22px 40px; -webkit-overflow-scrolling:touch; }
+  .sheet .bar { position:sticky; top:calc(-1 * max(22px, env(safe-area-inset-top))); z-index:2; display:flex; justify-content:flex-end; background:var(--cream); padding:8px 0; }
+  .sheet h2.name { margin:4px 0 2px; font-size:28px; letter-spacing:-.03em; }
+  .sheet .sub { color:var(--sage); font-weight:700; font-size:14px; margin:0 0 16px; overflow-wrap:anywhere; }
+  .sheet .grid { grid-template-columns:repeat(3, minmax(0,1fr)); }
+
+  /* Santé */
+  .health { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; margin:0 0 16px; }
+  .gauge { background:var(--white); border:1px solid var(--line); border-radius:22px; padding:16px 18px; }
+  .gauge .row { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+  .gauge b { font-size:15px; } .gauge .v { font-weight:900; font-variant-numeric:tabular-nums; }
+  .gauge .track { height:10px; border-radius:99px; background:var(--cream); margin:10px 0 8px; overflow:hidden; }
+  .gauge .fill { height:100%; border-radius:99px; background:#2E9E4F; }
+  .gauge.warn .fill { background:#E0A100; } .gauge.bad .fill { background:#B3261E; }
+  .gauge p { margin:0; color:var(--sage); font-size:13px; }
+  .verdict { border-radius:24px; padding:20px 22px; margin:0 0 16px; background:#E7F5EA; border:1px solid #BFE3C8; }
+  .verdict.warn { background:#FFF6DD; border-color:#F0D58A; } .verdict.bad { background:#FFF0EE; border-color:#F2B8B1; }
+  .verdict h2 { margin:0 0 6px; font-size:22px; } .verdict ul { margin:8px 0 0; padding-left:20px; } .verdict li { margin:4px 0; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#2E9E4F; margin-right:6px; }
+  .dot.warn { background:#E0A100; } .dot.bad { background:#B3261E; }
+  details.frames summary { cursor:pointer; color:var(--sage); font-size:12px; font-weight:800; }
+  details.frames pre { font-size:11px; white-space:pre-wrap; margin:6px 0 0; }
+
   @media (max-width:760px) {
+    .health { grid-template-columns:1fr; }
+    .sheet .inner { padding-left:16px; padding-right:16px; }
+    .sheet .grid { grid-template-columns:repeat(2, minmax(0,1fr)); }
     main.wide { padding-left:16px; padding-right:16px; }
     .grid { grid-template-columns:repeat(2, minmax(0,1fr)); }
     .report { flex-direction:column; }
@@ -132,10 +181,16 @@
   <div class="hidden" id="panel">
     <nav class="tabs" id="tabs">
       <button data-tab="home" class="on">Résumé</button>
+      <button data-tab="live">Activité en direct</button>
+      <button data-tab="players">Joueurs</button>
+      <button data-tab="screens">Écrans et temps</button>
+      <button data-tab="friends">Amis</button>
+      <button data-tab="health">Serveur et santé<span class="badge hidden" id="healthBadge"></span></button>
       <button data-tab="ai">IA et jetons</button>
-      <button data-tab="people">Personnes</button>
+      <button data-tab="people">IA par personne</button>
       <button data-tab="app">Usage de l'app</button>
       <button data-tab="foods">Aliments introuvables</button>
+      <button data-tab="ideas">Propositions<span class="badge hidden" id="ideasBadge"></span></button>
       <button data-tab="reports">Signalements<span class="badge hidden" id="reportsBadge"></span></button>
       <button data-tab="wait">Liste d'attente</button>
     </nav>
@@ -153,6 +208,113 @@
         <p class="lead">Jetons lus + écrits par Claude, toutes fonctions, 30 derniers jours (heure d'Israël).</p>
         <div class="bars" id="homeTokenBars"></div><div class="axis" id="homeTokenAxis"></div>
       </section>
+    </div>
+
+    <!-- ACTIVITÉ EN DIRECT -->
+    <div data-page="live" class="hidden">
+      <div class="grid" id="liveTiles"></div>
+      <section class="box">
+        <h2>Le fil <span class="live"><i></i>se met à jour toutes les 30 s</span></h2>
+        <p class="lead">Tout ce qui s'est passé ces 7 derniers jours, du plus récent au plus ancien : écrans, actions, IA, amis, inscriptions, plantages. Touche un nom pour voir sa fiche.</p>
+        <div class="seg" id="feedSeg">
+          <button data-f="all" class="on">Tout</button><button data-f="action">Actions</button><button data-f="screen">Écrans</button><button data-f="ai">IA</button><button data-f="friend">Amis</button><button data-f="signup">Inscriptions</button><button data-f="diagnostic">Plantages</button>
+        </div>
+        <div id="feed"></div>
+      </section>
+    </div>
+
+    <!-- JOUEURS -->
+    <div data-page="players" class="hidden">
+      <section class="box">
+        <h2>Tous les joueurs</h2>
+        <p class="lead">Les 300 vus le plus récemment. Touche une ligne pour ouvrir sa fiche : chronologie complète, temps passé, écrans, amis, IA, plantages.</p>
+        <input class="search" id="playerSearch" type="search" placeholder="Chercher un prénom ou un e-mail…" autocomplete="off">
+        <div class="scroll"><table id="playersTable"></table></div>
+      </section>
+    </div>
+
+    <!-- ÉCRANS ET TEMPS -->
+    <div data-page="screens" class="hidden">
+      <div class="grid" id="timeTiles"></div>
+      <section class="box">
+        <h2>Temps passé dans l'app, jour par jour</h2>
+        <p class="lead">Minutes en tout (toutes les personnes), 30 derniers jours.</p>
+        <div class="bars" id="minutesBars"></div><div class="axis" id="minutesAxis"></div>
+        <div class="scroll" style="margin-top:18px"><table id="timeTable"></table></div>
+      </section>
+      <section class="box">
+        <h2>Les écrans les plus utilisés</h2>
+        <p class="lead">30 derniers jours, classés par temps passé. « Vues » = combien de fois l'écran a été ouvert.</p>
+        <div class="scroll"><table id="screensTable"></table></div>
+      </section>
+      <section class="box">
+        <h2>Les actions</h2>
+        <p class="lead">Ce que les gens font vraiment (30 derniers jours).</p>
+        <div class="scroll"><table id="actionsTable"></table></div>
+      </section>
+      <section class="box">
+        <h2>À quelle heure on ouvre l'app</h2>
+        <p class="lead">Ouvertures par heure, 30 derniers jours (heure d'Israël).</p>
+        <div class="bars" id="openHourBars"></div><div class="axis" id="openHourAxis"></div>
+      </section>
+      <section class="box">
+        <h2>Versions et téléphones</h2>
+        <p class="lead">La dernière version utilisée par chaque personne (30 jours).</p>
+        <div class="scroll"><table id="versionsTable"></table></div>
+        <div class="scroll" style="margin-top:14px"><table id="devicesTable"></table></div>
+      </section>
+    </div>
+
+    <!-- AMIS -->
+    <div data-page="friends" class="hidden">
+      <div class="grid" id="friendTiles"></div>
+      <section class="box">
+        <h2>Qui a ajouté qui</h2>
+        <p class="lead">Les 60 dernières amitiés. « Invite » = celui qui a envoyé le code, « Rejoint » = celui qui l'a utilisé.</p>
+        <div class="scroll"><table id="friendsTable"></table></div>
+      </section>
+      <section class="box">
+        <h2>Ceux qui font venir le plus d'amis</h2>
+        <div class="scroll"><table id="invitersTable"></table></div>
+      </section>
+    </div>
+
+    <!-- SERVEUR ET SANTÉ -->
+    <div data-page="health" class="hidden">
+      <div class="seg" id="planSeg">
+        <button data-plan="free">Supabase gratuit</button><button data-plan="pro">Supabase Pro (25 $)</button>
+      </div>
+      <div id="verdict"></div>
+      <h2 style="margin:6px 0 10px">Le serveur (Supabase)</h2>
+      <div class="health" id="serverGauges"></div>
+      <h2 style="margin:6px 0 10px">L'app sur les téléphones</h2>
+      <div class="grid" id="appHealthTiles"></div>
+      <section class="box">
+        <h2>Plantages regroupés par cause</h2>
+        <p class="lead">Rapports d'Apple (MetricKit), 30 derniers jours. Le même bug = la même ligne. « Kayam. +0x… » = l'endroit dans le code (Claude peut le retrouver avec le fichier dSYM de la version).</p>
+        <div class="scroll"><table id="crashTable"></table></div>
+      </section>
+      <section class="box">
+        <h2>Mémoire (fuites de mémoire)</h2>
+        <p class="lead">La mémoire maximale mesurée par l'app à chaque ouverture, par version. Si elle monte de version en version, ou si iOS ferme l'app pour « trop de mémoire », il y a une fuite.</p>
+        <div class="scroll"><table id="memoryTable"></table></div>
+        <p class="note" id="memoryNote"></p>
+      </section>
+      <section class="box">
+        <h2>Les derniers rapports</h2>
+        <div id="diagList"></div>
+      </section>
+      <section class="box">
+        <h2>Ce qui prend de la place</h2>
+        <div class="scroll"><table id="tablesTable"></table></div>
+        <div class="scroll" style="margin-top:14px"><table id="storageTable"></table></div>
+      </section>
+      <section class="box">
+        <h2>Les requêtes les plus lentes</h2>
+        <p class="lead">En millisecondes, en moyenne. Au-dessus de 100 ms souvent = il manque un index.</p>
+        <div class="scroll"><table id="slowTable"></table></div>
+      </section>
+      <p class="note" id="healthNote"></p>
     </div>
 
     <!-- IA ET JETONS -->
@@ -190,7 +352,7 @@
       </section>
       <section class="box">
         <h2>Limites atteintes</h2>
-        <p class="lead">Combien de fois quelqu'un a atteint la limite du jour (20 phrases, 10 photos, 2 notes du coach), 30 derniers jours.</p>
+        <p class="lead">Combien de fois quelqu'un a atteint la limite du jour (20 phrases, 15 photos, 2 notes du coach), 30 derniers jours.</p>
         <div id="limits"></div>
       </section>
       <section class="box">
@@ -238,6 +400,15 @@
       </section>
     </div>
 
+    <!-- PROPOSITIONS (« Propose ton plat ») -->
+    <div data-page="ideas" class="hidden">
+      <section class="box">
+        <h2>Plats et aliments proposés</h2>
+        <p class="lead">Ce que les utilisateurs aimeraient trouver dans Kayam (bouton « Propose-le »). Les nouvelles d'abord. Range-les quand c'est fait.</p>
+        <div id="ideas"></div>
+      </section>
+    </div>
+
     <!-- SIGNALEMENTS -->
     <div data-page="reports" class="hidden">
       <section class="box">
@@ -258,6 +429,9 @@
 
     <p class="note">Les abonnements Pro et les revenus sont dans App Store Connect (Ventes et tendances), pas ici.</p>
   </div>
+
+  <!-- La fiche d'une personne -->
+  <div class="sheet hidden" id="sheet"><div class="inner" id="sheetInner"></div></div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
@@ -280,6 +454,49 @@ function usd(v) {
   if (v === 0) return "0 $";
   return (v >= 1 ? v.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : v.toLocaleString("fr-FR", { maximumSignificantDigits: 3 })) + " $";
 }
+// Une durée lisible : 45 s, 3 min 20, 1 h 05
+function dur(sec) {
+  sec = Math.round(Number(sec || 0));
+  if (sec < 60) return sec + " s";
+  const m = Math.floor(sec / 60), h = Math.floor(m / 60);
+  if (h) return h + " h " + String(m % 60).padStart(2, "0");
+  return m + " min" + (m < 10 && sec % 60 ? " " + String(sec % 60).padStart(2, "0") : "");
+}
+const hhmm = t => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+const dayLabel = t => {
+  const d = new Date(t), today = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.round((today - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+  return diff === 0 ? "Aujourd'hui" : diff === 1 ? "Hier" : d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+};
+const bytes = b => { b = Number(b || 0); return b >= 1073741824 ? (b / 1073741824).toLocaleString("fr-FR", { maximumFractionDigits: 2 }) + " Go" : b >= 1048576 ? (b / 1048576).toLocaleString("fr-FR", { maximumFractionDigits: 1 }) + " Mo" : Math.round(b / 1024) + " ko"; };
+const pctOf = (a, b) => b ? Math.round(a / b * 1000) / 10 : 0;
+
+// Les noms des écrans (Analytics.swift → .trackScreen("…"))
+const SCREENS = {
+  meals: "Repas (onglet)", workout: "Séance (onglet)", progress: "Progrès (onglet)", coach: "Coach (onglet)",
+  scanner: "Scanner (photo / code-barres)", voice: "Repas à la voix", meal_result: "Résultat voix / photo", food_picker: "Ajouter un aliment",
+  food_quantity: "Quantité d'un aliment", recipes: "Recettes", recipe_detail: "Une recette", recipe_add_to_meal: "Recette → repas",
+  paywall: "Écran Kayam Pro", pro_welcome: "Bienvenue dans Pro", profile: "Profil", friends: "Cercle d'amis", friends_invite: "Inviter un ami",
+  friend_sessions: "Séances d'un ami", friend_photo: "Photo d'un ami", friend_sharing: "Partage avec les amis", post_feed: "Fil des photos",
+  active_workout: "Séance en cours", workout_finished: "Séance terminée", meal_plan_builder: "Créer un plan de repas", meal_editor: "Modifier un repas",
+  suggest_dish: "Propose ton plat", assessment: "Bilan (questions)", assessment_result: "Bilan (résultat)", exercise_detail: "Fiche d'un exercice",
+  program_builder: "Créer un programme", routine_editor: "Modifier une routine", exercise_picker: "Choisir un exercice", swap: "Remplacer un repas",
+  create_food: "Créer un aliment", online_food_search: "Recherche en ligne", barcode_result: "Résultat code-barres",
+  settings_reminders: "Rappels", settings_food_country: "Pays des aliments", profile_personal: "Infos perso", profile_goal: "Objectif",
+  profile_targets: "Objectifs du jour", profile_food_prefs: "Préférences alimentaires", profile_preferences: "Préférences", help_faq: "Aide (FAQ)",
+  gap_ideas: "Idées pour combler", target_setup: "Réglage des objectifs", complete_program: "Compléter le programme", import_workouts: "Importer des séances",
+  before_after: "Avant / après", share_card: "Carte à partager", quick_day: "Journée rapide", ate_out: "Mangé dehors", coach_apply: "Appliquer le conseil",
+  past_days: "Jours passés", past_day: "Un jour passé", progress_body: "Progrès > Corps", progress_performance: "Progrès > Performance",
+  progress_weekly: "Progrès > Semaine", shared_routine: "Routine reçue", treat_planner: "Plaisirs prévus", cravings: "Envies",
+  commitments_editor: "Mes engagements", add_measurement: "Ajouter une mesure",
+};
+const ACTIONS = {
+  workout_finished: "a terminé une séance 💪", meal_saved: "a enregistré un repas 🍽", meal_plan_used: "a pris un plan de repas",
+  pro_purchased: "est passé Pro 💎", onboarding_finished: "a fini les questions du début", signed_out: "s'est déconnecté",
+  friend_invite_created: "a créé un code d'invitation", friend_code_entered: "a entré le code d'un ami", friend_request_accepted: "a accepté un ami 🤝",
+  friend_request_declined: "a refusé une demande d'ami", friend_bump_sent: "a envoyé un 👊",
+};
+const screenName = n => SCREENS[n] || n;
 const FEATURES = { voice: "Repas à la voix", photo: "Repas en photo", coach: "Notes du coach" };
 const UNIT = { voice: "phrase", photo: "photo", coach: "note" };
 const PROVIDERS = { google: "Google", apple: "Apple", email: "E-mail" };
@@ -378,8 +595,9 @@ async function load() {
   if (loading) return;
   loading = true;
   $("when").textContent = "Chargement…";
-  const [overview, ai, app, misses] = await Promise.all([
+  const [overview, ai, app, misses, ideas, activity, health] = await Promise.all([
     sb.rpc("admin_overview"), sb.rpc("admin_ai_usage"), sb.rpc("admin_app_usage"), sb.rpc("admin_food_misses"),
+    sb.rpc("admin_dish_suggestions"), sb.rpc("admin_activity"), sb.rpc("admin_health"),
   ]);
   loading = false;
   if (overview.error && (overview.error.message || "").includes("not_admin")) {
@@ -397,7 +615,63 @@ async function load() {
   if (app.error) failed("peopleTable", missing); else renderApp(app.data);
   if (misses.error) failed("missesTable", "Pas encore disponible : lance Tools/food_misses.sql dans Supabase.");
   else table("missesTable", ["Mot", "Langue", "#Fois"], misses.data.map(m => ["« " + m.query + " »", m.lang.toUpperCase(), num(m.count)]));
+  if (ideas.error) $("ideas").replaceChildren(el("p", "err", "Pas encore disponible : lance Tools/dish_suggestions.sql dans Supabase (SQL Editor)."));
+  else renderIdeas(ideas.data);
+  const missing3 = "Pas encore disponible : lance Tools/admin_activity.sql dans Supabase (SQL Editor).";
+  if (activity.error) { ACT = null; for (const id of ["feed", "liveTiles", "timeTiles", "friendTiles"]) $(id).replaceChildren(el("p", "err", missing3)); failed("playersTable", missing3); }
+  else { ACT = activity.data; renderActivity(); }
+  if (health.error) { HEALTH = null; $("verdict").replaceChildren(el("p", "err", missing3)); }
+  else { HEALTH = health.data; renderHealth(); }
   renderHome(overview.data, AI, app.data);
+}
+
+// L'activité en direct : on recharge seulement le fil et la santé, toutes les 30 s, quand la page est visible
+setInterval(async () => {
+  if (document.hidden || loading || !["live", "health", "home"].includes(tab) || !$("sheet").classList.contains("hidden")) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  const [activity, health] = await Promise.all([sb.rpc("admin_activity"), sb.rpc("admin_health")]);
+  if (!activity.error) { ACT = activity.data; renderActivity(); }
+  if (!health.error) { HEALTH = health.data; renderHealth(); }
+  $("when").textContent = "Mis à jour à " + new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}, 30000);
+
+// ---------- Propositions ----------
+const IDEA_STATUS = { new: "Nouvelle", added: "Ajoutée ✓", refused: "Refusée" };
+function renderIdeas(list) {
+  const box = $("ideas"); box.replaceChildren();
+  const badge = $("ideasBadge");
+  const count = () => list.filter(i => i.status === "new").length;
+  const updateBadge = () => { badge.textContent = count(); badge.classList.toggle("hidden", !count()); };
+  updateBadge();
+  if (!list.length) box.append(el("p", "empty", "Aucune proposition pour l'instant."));
+  for (const idea of list) {
+    const card = el("div", "report" + (idea.status === "new" ? "" : " done"));
+    const text = el("div");
+    text.append(el("div", "meta", date(idea.created_at) + " · " + (idea.kind === "food" ? "Aliment" : "Plat") + " · " + idea.lang.toUpperCase()
+      + " · " + IDEA_STATUS[idea.status]));
+    const name = el("p"); name.append(el("b", null, idea.name)); text.append(name);
+    if (idea.ingredients) text.append(el("p", null, "Ingrédients : " + idea.ingredients));
+    if (idea.message) text.append(el("p", null, "« " + idea.message + " »"));
+    if (idea.email) text.append(el("p", "meta", idea.email));
+    const actions = el("div");
+    const set = (status, label) => {
+      const b = el("button", null, label);
+      b.addEventListener("click", async () => {
+        b.disabled = true;
+        const { error } = await sb.rpc("admin_set_suggestion_status", { p_id: idea.id, p_status: status });
+        b.disabled = false;
+        if (error) { b.textContent = "Réessayer"; return; }
+        idea.status = status;
+        renderIdeas(list);
+      });
+      return b;
+    };
+    if (idea.status === "new") actions.append(set("added", "Ajoutée ✓"), set("refused", "Refuser"));
+    else actions.append(set("new", "Remettre en nouvelle"));
+    card.append(text, actions);
+    box.append(card);
+  }
 }
 $("refresh").addEventListener("click", load);
 sb.auth.onAuthStateChange(() => { setTimeout(load, 0); });
@@ -408,7 +682,13 @@ function renderHome(o, ai, app) {
   if (o) {
     items.push([num(o.users.total), "comptes au total", "+" + num(o.users.week) + " en 7 jours · +" + num(o.users.today) + " aujourd'hui", true]);
   }
-  if (app) items.push([num(app.activity.used_week), "ont utilisé l'app en 7 jours", num(app.activity.used_day) + " depuis 24 h"]);
+  if (ACT) items.push([num(ACT.totals.users_today), "personnes aujourd'hui", dur(ACT.totals.seconds_today) + " dans l'app · " + num(ACT.totals.users_week) + " en 7 jours"]);
+  else if (app) items.push([num(app.activity.used_week), "ont utilisé l'app en 7 jours", num(app.activity.used_day) + " depuis 24 h"]);
+  if (HEALTH) {
+    const v = document.querySelector("#verdict .verdict");
+    const lvl = v ? (v.classList.contains("bad") ? "🔴 Problème" : v.classList.contains("warn") ? "🟠 À surveiller" : "🟢 En forme") : "—";
+    items.push([lvl, "serveur et app", num(HEALTH.app.crashes_week) + " plantage(s) en 7 jours · voir « Serveur et santé »"]);
+  }
   if (ai) {
     const all = ai.totals.filter(t => t.period === "all"), month = ai.totals.filter(t => t.period === "month");
     const tok = rows => rows.reduce((s, t) => s + Number(t.input_tokens) + Number(t.output_tokens), 0);
@@ -553,6 +833,309 @@ function renderApp(a) {
   table("savedTable", ["Carnet", "#Personnes", "#Éléments"], a.saved.map(k => [KINDS[k.kind] || k.kind, num(k.users), num(k.items)]));
   table("peopleTable", ["E-mail", "Avec", "Inscrit", "Dernière utilisation", "#Séances", "#Repas", "#Pesées", "#Appels IA"],
     a.people.map(p => [p.email || "—", PROVIDERS[p.provider] || p.provider, dayOnly(p.created_at), ago(p.last_sync), num(p.workouts), num(p.meals), num(p.weighins), num(p.ai_calls)]));
+}
+
+// ---------- Activité ----------
+let ACT = null, HEALTH = null, feedFilter = "all";
+try { feedFilter = sessionStorage.getItem("adminFeed") || "all"; } catch {}
+$("feedSeg").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  feedFilter = b.dataset.f;
+  try { sessionStorage.setItem("adminFeed", feedFilter); } catch {}
+  if (ACT) renderFeed();
+});
+
+// Le nom d'une personne, cliquable → sa fiche
+function who(id, email, name) {
+  const b = el("button", "who", name || (email ? email.split("@")[0] : "?"));
+  b.title = email || "";
+  b.addEventListener("click", ev => { ev.stopPropagation(); openPerson(id); });
+  return b;
+}
+
+// Une ligne du fil / de la chronologie : icône, phrase, détail
+function describe(item) {
+  const k = item.kind, n = item.name;
+  if (k === "screen") return ["👁", "", "a regardé « " + screenName(n) + " »", item.value ? "pendant " + dur(item.value) : ""];
+  if (k === "action") return ["⚡", "", ACTIONS[n] || "action : " + n, ""];
+  if (k === "ai") return ["🤖", "ai", "a utilisé l'IA : " + (FEATURES[n] || n), ""];
+  if (k === "friend") return ["🤝", "friend", n === "accepted_invite" ? "a rejoint un ami avec un code" : "est devenu ami avec " + n, ""];
+  if (k === "signup") return ["✨", "signup", "a créé son compte", "avec " + (PROVIDERS[n] || n)];
+  if (k === "diagnostic") return ["💥", "crash", n.startsWith("crash") ? "a eu un plantage de l'app" : n.startsWith("hang") ? "a eu un blocage de l'app" : "a eu un problème : " + n, n.includes(":") ? n.split(":").slice(1).join(":").trim() : ""];
+  if (k === "open") return ["📱", "open", "a ouvert l'app", (item.value ? dur(item.value) : "en cours") + (n ? " · version " + n : "")];
+  return ["•", "", k + " " + n, ""];
+}
+
+function feedList(items, withWho) {
+  const box = el("div");
+  let day = null, ul = null;
+  for (const it of items) {
+    const d = dayLabel(it.at);
+    if (d !== day) { day = d; box.append(el("div", "dayhead", d)); ul = el("ul", "feed"); box.append(ul); }
+    const [icon, cls, text, detail] = describe(it);
+    const li = el("li");
+    li.append(el("span", "ic " + cls, icon));
+    const w = el("div", "what");
+    if (withWho) { w.append(who(it.user_id, it.email, it.first_name), document.createTextNode(" " + text)); }
+    else w.append(document.createTextNode(text.charAt(0).toUpperCase() + text.slice(1)));
+    if (detail || (withWho && it.email && it.first_name)) w.append(el("small", null, [detail, withWho && it.first_name ? it.email : ""].filter(Boolean).join(" · ")));
+    li.append(w, el("span", "t", hhmm(it.at)));
+    ul.append(li);
+  }
+  if (!items.length) box.append(el("p", "empty", "Rien pour l'instant."));
+  return box;
+}
+
+function renderFeed() {
+  $("feedSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.f === feedFilter));
+  const items = ACT.feed.filter(i => feedFilter === "all" || i.kind === feedFilter);
+  $("feed").replaceChildren(feedList(items.slice(0, 200), true));
+}
+
+function renderActivity() {
+  const t = ACT.totals;
+  const perUserDay = t.users_month ? t.seconds_month / 30 / Math.max(1, t.users_month) : 0;
+  tiles("liveTiles", [
+    [num(t.users_today), "personnes aujourd'hui", num(t.sessions_today) + " ouvertures · " + dur(t.seconds_today) + " en tout", true],
+    [num(t.users_week), "en 7 jours", num(t.users_month) + " en 30 jours"],
+    [dur(t.avg_session_s), "par ouverture (moyenne)", "la moitié des ouvertures durent moins de " + dur(t.median_session_s)],
+    [dur(t.seconds_month / Math.max(1, t.users_month)), "par personne sur 30 jours", "≈ " + dur(perUserDay) + " par jour"],
+  ]);
+  renderFeed();
+
+  // Joueurs
+  renderPlayers();
+
+  // Écrans et temps
+  tiles("timeTiles", [
+    [dur(t.seconds_month), "passées dans l'app (30 j)", num(t.sessions_month) + " ouvertures", true],
+    [dur(t.avg_session_s), "par ouverture", "médiane " + dur(t.median_session_s)],
+    [num(ACT.screens.length), "écrans différents vus", ""],
+    [t.tracked_since ? dayOnly(t.tracked_since) : "—", "mesuré depuis", "avant : pas de mesure"],
+  ]);
+  const d = ACT.daily;
+  bars("minutesBars", "minutesAxis", d.map(x => Math.round(x.seconds / 60)), d.map((x, i) => i % 3 === 0 ? String(Number(x.day.slice(8))) : ""), v => v + " min");
+  table("timeTable", ["Jour", "#Personnes", "#Ouvertures", "#Temps en tout", "#Par personne", "#Inscriptions"],
+    d.slice().reverse().filter(x => x.sessions || x.signups).map(x => [
+      new Date(x.day + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }),
+      num(x.users), num(x.sessions), dur(x.seconds), x.users ? dur(x.seconds / x.users) : "—", num(x.signups)]));
+  const totalScreen = ACT.screens.reduce((a, x) => a + Number(x.seconds), 0);
+  table("screensTable", ["Écran", "#Temps en tout", "#Part", "#Vues", "#Personnes", "#Temps moyen"],
+    ACT.screens.map(x => [screenName(x.name), dur(x.seconds), pctOf(x.seconds, totalScreen) + " %", num(x.views), num(x.users), dur(x.avg_s)]));
+  table("actionsTable", ["Action", "#Fois", "#Personnes"], ACT.actions.map(x => [(ACTIONS[x.name] || x.name).replace(/^a |^est |^s'est /, ""), num(x.count), num(x.users)]));
+  bars("openHourBars", "openHourAxis", ACT.hours, ACT.hours.map((_, h) => h % 3 === 0 ? h + "h" : ""));
+  table("versionsTable", ["Version", "#Personnes"], ACT.versions.map(v => [v.version, num(v.users)]));
+  table("devicesTable", ["Téléphone", "#Personnes"], ACT.devices.map(v => [phone(v.device), num(v.users)]));
+
+  // Amis
+  const f = ACT.friends;
+  tiles("friendTiles", [
+    [num(f.total), "amitiés en tout", "+" + num(f.week) + " en 7 jours · +" + num(f.month) + " en 30 jours", true],
+    [num(f.people_with_friend), "personnes ont au moins un ami", ACT.people.length ? pctOf(f.people_with_friend, ACT.people.length) + " % des comptes" : ""],
+    [num(f.invites_month), "codes créés (30 j)", num(f.claimed_month) + " utilisés (" + pctOf(f.claimed_month, f.invites_month) + " %)"],
+    [num(f.bumps_month), "👊 envoyés (30 j)", ""],
+  ]);
+  table("friendsTable", ["Quand", "Invite", "Rejoint"], f.latest.map(x => [date(x.at), who(x.inviter_id, x.inviter, x.inviter_name), who(x.invitee_id, x.invitee, x.invitee_name)]));
+  table("invitersTable", ["Personne", "#Amis venus", "#Codes créés"], f.top_inviters.map(x => [who(x.id, x.email, x.first_name), num(x.claimed), num(x.invites)]));
+}
+
+// « iPhone16,1 » → « iPhone 15 Pro » (les plus courants)
+const PHONES = { "iPhone12,1": "iPhone 11", "iPhone12,3": "iPhone 11 Pro", "iPhone12,5": "iPhone 11 Pro Max", "iPhone12,8": "iPhone SE (2e)",
+  "iPhone13,2": "iPhone 12", "iPhone13,3": "iPhone 12 Pro", "iPhone13,4": "iPhone 12 Pro Max", "iPhone13,1": "iPhone 12 mini",
+  "iPhone14,5": "iPhone 13", "iPhone14,2": "iPhone 13 Pro", "iPhone14,3": "iPhone 13 Pro Max", "iPhone14,4": "iPhone 13 mini", "iPhone14,6": "iPhone SE (3e)",
+  "iPhone14,7": "iPhone 14", "iPhone14,8": "iPhone 14 Plus", "iPhone15,2": "iPhone 14 Pro", "iPhone15,3": "iPhone 14 Pro Max",
+  "iPhone15,4": "iPhone 15", "iPhone15,5": "iPhone 15 Plus", "iPhone16,1": "iPhone 15 Pro", "iPhone16,2": "iPhone 15 Pro Max",
+  "iPhone17,3": "iPhone 16", "iPhone17,4": "iPhone 16 Plus", "iPhone17,1": "iPhone 16 Pro", "iPhone17,2": "iPhone 16 Pro Max", "iPhone17,5": "iPhone 16e",
+  "iPhone18,3": "iPhone 17", "iPhone18,1": "iPhone 17 Pro", "iPhone18,2": "iPhone 17 Pro Max", "iPhone18,4": "iPhone Air" };
+const phone = d => d ? (PHONES[d] ? PHONES[d] + " (" + d + ")" : d) : "—";
+
+let playerQuery = "";
+$("playerSearch").addEventListener("input", e => { playerQuery = e.target.value.trim().toLowerCase(); if (ACT) renderPlayers(); });
+function renderPlayers() {
+  const list = ACT.people.filter(p => !playerQuery || (p.email || "").toLowerCase().includes(playerQuery) || (p.first_name || "").toLowerCase().includes(playerQuery));
+  const t = $("playersTable"); t.replaceChildren();
+  const heads = ["Joueur", "Dernière visite", "#Temps 30 j", "#Ouvertures 30 j", "#Jours actifs 30 j", "Écran préféré", "#Amis", "#IA", "#Plantages", "Version", "Inscrit"];
+  const tr = el("tr"); heads.forEach(h => tr.append(el("th", h.startsWith("#") ? "r" : null, h.replace(/^#/, ""))));
+  const head = el("thead"); head.append(tr); t.append(head);
+  const body = el("tbody");
+  for (const p of list) {
+    const r = el("tr", "click");
+    r.addEventListener("click", () => openPerson(p.id));
+    const name = el("td"); name.append(el("b", null, p.first_name || (p.email || "?").split("@")[0])); name.append(el("div", "meta", p.email || ""));
+    name.lastChild.style.cssText = "color:var(--sage);font-size:12px";
+    r.append(name);
+    [ago(p.last_seen), dur(p.seconds_month), num(p.sessions_month), num(p.days_month) + " / 30", p.top_screen ? screenName(p.top_screen) : "—",
+     num(p.friends), num(p.ai_calls), p.crashes ? "💥 " + num(p.crashes) : "0", p.app_version || "—", dayOnly(p.signed_up)].forEach((v, i) => {
+      r.append(el("td", heads[i + 1].startsWith("#") ? "r" : null, v));
+    });
+    body.append(r);
+  }
+  if (!list.length) { const r = el("tr"); const td = el("td", "empty", "Personne ne correspond."); td.colSpan = heads.length; r.append(td); body.append(r); }
+  t.append(body);
+}
+
+// ---------- La fiche d'une personne ----------
+$("sheet").addEventListener("click", e => { if (e.target.id === "sheet") closePerson(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePerson(); });
+function closePerson() { $("sheet").classList.add("hidden"); document.body.style.overflow = ""; }
+
+async function openPerson(id) {
+  if (!id) return;
+  const box = $("sheetInner");
+  const close = el("div", "bar"), closeBtn = el("button", "ghost small", "Fermer ✕");
+  closeBtn.addEventListener("click", closePerson); close.append(closeBtn);
+  box.replaceChildren(close, el("p", "empty", "Chargement de la fiche…"));
+  $("sheet").classList.remove("hidden"); document.body.style.overflow = "hidden";
+  box.scrollTop = 0;
+  const { data, error } = await sb.rpc("admin_user_detail", { p_user: id });
+  if (error || !data || !data.profile) { box.replaceChildren(close, el("p", "err", "Impossible de charger cette fiche" + (error ? " : " + error.message : "."))); return; }
+  const p = data.profile, st = data.stats;
+  const parts = [close, el("h2", "name", p.first_name || (p.email || "?").split("@")[0]),
+    el("p", "sub", (p.email || "") + " · inscrit le " + dayOnly(p.created_at) + " avec " + (PROVIDERS[p.provider] || p.provider) + " · dernière visite " + ago(st.last_seen || p.last_sign_in_at))];
+  const g = el("div", "grid");
+  [[dur(st.seconds), "dans l'app en tout", num(st.sessions) + " ouvertures", true],
+   [dur(st.avg_session_s), "par ouverture"],
+   [num(st.days_active), "jours actifs", st.first_seen ? "depuis le " + dayOnly(st.first_seen) : ""],
+   [num(data.friends.length), "amis", num(data.invites.claimed) + " venus grâce à lui·elle"],
+   [st.memory_peak_mb ? st.memory_peak_mb + " Mo" : "—", "mémoire max"],
+   [num(st.crashes), "plantages", num(st.hangs) + " blocages"]].forEach(([v, l, d, dark]) => {
+    const t = el("div", "tile" + (dark ? " dark" : "")); t.append(el("b", null, v), el("span", null, l)); if (d) t.append(el("small", null, d)); g.append(t);
+  });
+  parts.push(g);
+
+  const sec = (title, lead, ...content) => { const s = el("section", "box"); s.append(el("h2", null, title)); if (lead) s.append(el("p", "lead", lead)); s.append(...content); return s; };
+  const b = el("div", "bars"), a = el("div", "axis"); b.id = "pBars"; a.id = "pAxis";
+  parts.push(sec("Temps passé par jour", "30 derniers jours.", b, a));
+  parts.push(sec("Chronologie", "Tout ce qu'il ou elle a fait, du plus récent au plus ancien (500 dernières lignes).", feedList(data.timeline, false)));
+
+  const mk = (heads, rows) => { const t = el("table"); t.id = "tmp" + Math.random().toString(36).slice(2); const w = el("div", "scroll"); w.append(t); return [w, t.id, heads, rows]; };
+  const tablesToFill = [];
+  const addTable = (title, lead, heads, rows) => { const [w, tid] = mk(); parts.push(sec(title, lead, w)); tablesToFill.push([tid, heads, rows]); };
+  addTable("Ses écrans", "Classés par temps passé (depuis le début).", ["Écran", "#Temps", "#Vues"], data.screens.map(x => [screenName(x.name), dur(x.seconds), num(x.views)]));
+  addTable("Ses amis", null, ["Ami", "Depuis"], data.friends.map(f => [who(f.id, f.email, f.first_name), dayOnly(f.since)]));
+  addTable("IA", null, ["Fonction", "#Appels", "#Coût", "Dernier"], data.ai.map(x => [FEATURES[x.feature] || x.feature, num(x.calls), usd(x.cost), ago(x.last)]));
+  addTable("Sauvegardé en ligne", null, ["Carnet", "#Éléments", "Mis à jour"], data.saved.map(x => [KINDS[x.kind] || x.kind, num(x.items), ago(x.updated_at)]));
+  addTable("Ses ouvertures de l'app", "Les 60 dernières.", ["Début", "#Durée", "#Écrans", "#Mémoire max", "Version", "Téléphone"],
+    data.sessions.map(x => [date(x.started_at), dur(x.duration_s), num(x.screens), x.memory_peak_mb ? x.memory_peak_mb + " Mo" : "—", x.app_version || "—", phone(x.device) + (x.os_version ? " · iOS " + x.os_version : "")]));
+
+  box.replaceChildren(...parts);
+  for (const [tid, heads, rows] of tablesToFill) table(tid, heads, rows);
+  const d = data.daily;
+  bars("pBars", "pAxis", d.map(x => Math.round(x.seconds / 60)), d.map((x, i) => i % 3 === 0 ? String(Number(x.day.slice(8))) : ""), v => v + " min");
+}
+
+// ---------- Serveur et santé ----------
+// Les limites de Supabase (à vérifier sur supabase.com/pricing si le plan change)
+const PLANS = {
+  free: { name: "gratuit", db: 500 * 1048576, storage: 1024 * 1048576, mau: 50000, functions: 500000 },
+  pro: { name: "Pro", db: 8 * 1073741824, storage: 100 * 1073741824, mau: 100000, functions: 2000000 },
+};
+let plan = "free";
+try { plan = localStorage.getItem("adminPlan") || "free"; } catch {}
+$("planSeg").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  plan = b.dataset.plan;
+  try { localStorage.setItem("adminPlan", plan); } catch {}
+  if (HEALTH) renderHealth();
+});
+
+function gauge(title, value, max, text, level) {
+  const p = max ? Math.min(100, value / max * 100) : 0;
+  level = level ?? (p >= 80 ? "bad" : p >= 60 ? "warn" : "");
+  const g = el("div", "gauge " + level);
+  const row = el("div", "row"); row.append(el("b", null, title), el("span", "v", max ? (Math.round(p * 10) / 10) + " %" : ""));
+  const track = el("div", "track"), fill = el("div", "fill"); fill.style.width = Math.max(1.5, p) + "%"; track.append(fill);
+  g.append(row, track, el("p", null, text));
+  return [g, level];
+}
+
+function renderHealth() {
+  const h = HEALTH, L = PLANS[plan], db = h.db, ap = h.app;
+  $("planSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.plan === plan));
+  const issues = [];
+  const note = (level, text) => issues.push([level, text]);
+
+  // Le serveur
+  const storageBytes = h.storage.reduce((s, x) => s + Number(x.bytes), 0);
+  const bytesPerUser = h.users.total ? db.user_bytes / h.users.total : 0;
+  const room = bytesPerUser ? Math.max(0, (L.db - db.bytes) / bytesPerUser) : null;
+  const gauges = [
+    gauge("Base de données", db.bytes, L.db, bytes(db.bytes) + " sur " + bytes(L.db) + (room != null ? " · encore ≈ " + num(Math.round(room)) + " comptes comme les actuels (" + bytes(bytesPerUser) + " chacun)" : "")),
+    gauge("Fichiers (photos)", storageBytes, L.storage, bytes(storageBytes) + " sur " + bytes(L.storage) + " · " + num(h.storage.reduce((s, x) => s + Number(x.files), 0)) + " fichiers"),
+    gauge("Connexions à la base", db.connections, db.max_connections, num(db.connections) + " ouvertes sur " + num(db.max_connections) + " · " + num(db.active) + " au travail" + (db.long_queries ? " · ⚠️ " + db.long_queries + " requête(s) de plus de 30 s" : "")),
+    gauge("Utilisateurs actifs (MAU)", h.users.mau, L.mau, num(h.users.mau) + " sur " + num(L.mau) + " par mois · " + num(h.users.total) + " comptes en tout"),
+    gauge("Appels des fonctions IA ce mois", h.ai.calls_month, L.functions, num(h.ai.calls_month) + " sur " + num(L.functions) + " (voix, photo, coach)"),
+  ];
+  const hit = Number(db.cache_hit || 100);
+  gauges.push(gauge("Mémoire du serveur (cache)", hit, 100, hit + " % des lectures servies depuis la mémoire. En dessous de 99 % : le serveur manque de mémoire, passer à une taille au-dessus.", hit < 95 ? "bad" : hit < 99 ? "warn" : ""));
+  const errRate = h.ai.calls_day ? h.ai.errors_day / h.ai.calls_day : 0;
+  gauges.push(gauge("Erreurs de l'IA (24 h)", h.ai.errors_day, Math.max(1, h.ai.calls_day), num(h.ai.errors_day) + " sur " + num(h.ai.calls_day) + " appels · 7 jours : " + num(h.ai.errors_week) + " sur " + num(h.ai.calls_week), h.ai.calls_day < 10 ? (h.ai.errors_day >= 3 ? "warn" : "") : errRate > .25 ? "bad" : errRate > .1 ? "warn" : ""));
+  $("serverGauges").replaceChildren(...gauges.map(x => x[0]));
+  const names = ["La base de données", "Les fichiers", "Les connexions", "Les utilisateurs actifs", "Les appels IA", "La mémoire du serveur", "Les erreurs de l'IA"];
+  gauges.forEach(([, level], i) => { if (level) note(level, names[i] + (level === "bad" ? " : critique" : " : à surveiller")); });
+  if (db.deadlocks) note("warn", num(db.deadlocks) + " blocage(s) entre requêtes (deadlocks) depuis " + (db.stats_reset ? dayOnly(db.stats_reset) : "le démarrage"));
+
+  // L'app sur les téléphones
+  const crashFree = ap.sessions_month ? Math.max(0, 100 - ap.crashes_month / ap.sessions_month * 100) : 100;
+  const mem = ap.memory || {}, ex = ap.exits || {};
+  tiles("appHealthTiles", [
+    [ap.sessions_month ? (Math.round(crashFree * 100) / 100) + " %" : "—", "ouvertures sans plantage (30 j)", "objectif : plus de 99,5 %", true],
+    [num(ap.crashes_month), "plantages (30 j)", num(ap.crash_users_month) + " personne(s) touchée(s) · " + num(ap.crashes_week) + " en 7 jours"],
+    [num(ap.hangs_month), "blocages (30 j)", "l'écran ne répond plus pendant plus de 250 ms"],
+    [mem.avg ? mem.avg + " Mo" : "—", "mémoire moyenne", mem.max ? "95 % des ouvertures sous " + Math.round(mem.p95) + " Mo · max " + mem.max + " Mo" : "pas encore mesuré"],
+    [num(ex.memory || 0), "fermetures par iOS pour trop de mémoire", "au premier plan, 30 j (rapports Apple) · arrière-plan : " + num(ex.background_memory || 0)],
+    [num(ex.watchdog || 0), "fermetures pour app trop lente", "lancement ou retour trop long"],
+    [ex.launch_ms ? num(ex.launch_ms) + " ms" : "—", "temps de lancement", "moyenne Apple · objectif sous 400 ms"],
+    [num(ex.reports || 0), "rapports quotidiens d'Apple", "iOS les envoie une fois par jour"],
+  ]);
+  if (ap.sessions_month && crashFree < 97) note("bad", "Trop de plantages : " + (Math.round(crashFree * 10) / 10) + " % d'ouvertures sans plantage");
+  else if (ap.sessions_month && crashFree < 99.5) note("warn", "Quelques plantages : " + (Math.round(crashFree * 10) / 10) + " % d'ouvertures sans plantage");
+  if (ex.memory) note("warn", "iOS a fermé l'app " + ex.memory + " fois pour trop de mémoire (possible fuite)");
+  if (mem.p95 > 700) note("warn", "L'app utilise beaucoup de mémoire (" + Math.round(mem.p95) + " Mo pour 95 % des ouvertures)");
+
+  table("crashTable", ["Cause", "#Fois", "#Personnes", "Versions", "Dernière"], ap.top_crashes.map(c => [c.summary, num(c.count), num(c.users), c.versions || "—", ago(c.last)]));
+  table("memoryTable", ["Version", "#Ouvertures", "#Mémoire moyenne", "#Mémoire max", "#Durée moyenne"],
+    ap.memory_by_version.map(m => [m.version, num(m.sessions), m.avg_mb + " Mo", m.max_mb + " Mo", dur(m.avg_s)]));
+  const versions = ap.memory_by_version.filter(m => m.sessions >= 5);
+  $("memoryNote").textContent = versions.length >= 2 && Number(versions[0].avg_mb) > Number(versions[1].avg_mb) * 1.3
+    ? "⚠️ La dernière version utilise 30 % de mémoire de plus que la précédente : à vérifier."
+    : "Pas de signe de fuite de mémoire" + (ex.memory ? "" : " (aucune fermeture par iOS pour trop de mémoire)") + ".";
+
+  const list = $("diagList"); list.replaceChildren();
+  if (!ap.latest.length) list.append(el("p", "empty", "Aucun plantage ni blocage reçu. 👌 (Les rapports d'Apple arrivent le lendemain.)"));
+  for (const d of ap.latest) {
+    const card = el("div", "report");
+    const text = el("div");
+    text.append(el("div", "meta", date(d.created_at) + " · " + ({ crash: "💥 Plantage", hang: "🧊 Blocage", cpu: "🔥 Processeur", disk: "💾 Disque", launch: "🐢 Lancement lent" }[d.kind] || d.kind)
+      + " · " + (d.app_version || "?") + " · " + phone(d.device) + (d.os_version ? " · iOS " + d.os_version : "")));
+    text.append(el("p", null, d.summary || ""));
+    const det = d.details || {};
+    const extra = [det.termination, det.objc, det.hang_ms ? "bloqué " + num(det.hang_ms) + " ms" : null].filter(Boolean).join(" · ");
+    if (extra) text.append(el("p", "meta", extra));
+    if (det.frames && det.frames.length) {
+      const f = el("details", "frames"); f.append(el("summary", null, "Le chemin dans le code (" + det.frames.length + " étapes)"), el("pre", null, det.frames.join("\n")));
+      text.append(f);
+    }
+    if (d.email) text.append(el("p", "meta", d.email));
+    card.append(text);
+    list.append(card);
+  }
+
+  table("tablesTable", ["Table", "#Taille", "#Lignes (environ)"], h.tables.map(t => [t.name, bytes(t.bytes), num(t.rows)]));
+  table("storageTable", ["Dossier de fichiers", "#Fichiers", "#Taille"], h.storage.map(x => [x.bucket, num(x.files), bytes(x.bytes)]));
+  table("slowTable", ["Requête", "#Appels", "#Moyenne", "#Max"], h.slow.map(q => [q.query, num(q.calls), num(q.mean_ms) + " ms", num(q.max_ms) + " ms"]));
+
+  // Le verdict
+  const level = issues.some(i => i[0] === "bad") ? "bad" : issues.length ? "warn" : "";
+  const v = el("div", "verdict " + level);
+  v.append(el("h2", null, level === "bad" ? "🔴 Il y a un problème" : level === "warn" ? "🟠 Ça marche, à surveiller" : "🟢 Tout va bien"));
+  v.append(el("p", null, (room != null ? "Avec le plan " + L.name + ", la base peut encore accueillir ≈ " + num(Math.round(room)) + " comptes comme les actuels. " : "")
+    + "Serveur démarré " + ago(db.started_at) + " · " + db.version + "."));
+  if (issues.length) { const ul = el("ul"); issues.forEach(([lv, t]) => { const li = el("li"); li.append(el("span", "dot " + lv), document.createTextNode(t)); ul.append(li); }); v.append(ul); }
+  $("verdict").replaceChildren(v);
+  const badge = $("healthBadge");
+  badge.textContent = "!"; badge.classList.toggle("hidden", level !== "bad");
+  $("healthNote").textContent = "La charge du processeur et la mémoire vive du serveur ne se lisent pas depuis la base : seules les mesures ci-dessus (cache, connexions, requêtes lentes) les reflètent. Les plantages viennent des rapports d'Apple : ils arrivent le lendemain, seulement des personnes qui ont accepté de partager les données d'analyse avec les développeurs (réglage de l'iPhone) et qui n'ont pas coupé « Aider à améliorer Kayam ».";
 }
 </script>
 </body>
