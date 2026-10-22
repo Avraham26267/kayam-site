@@ -205,6 +205,11 @@
     <div data-page="home">
       <div class="grid" id="homeTiles"></div>
       <section class="box">
+        <h2>Les vrais inscrits</h2>
+        <p class="lead">Chaque personne qui a créé un compte depuis la sortie (sans les testeurs), du plus récent au plus ancien. Touche une ligne pour ouvrir sa fiche.</p>
+        <div class="scroll"><table id="realTable"></table></div>
+      </section>
+      <section class="box">
         <h2>Nouveaux comptes</h2>
         <p class="lead">Les inscriptions des 14 derniers jours.</p>
         <div class="bars" id="signupBars"></div><div class="axis" id="signupAxis"></div>
@@ -235,6 +240,7 @@
         <h2>Tous les joueurs</h2>
         <p class="lead">Les 300 vus le plus récemment. Touche une ligne pour ouvrir sa fiche : chronologie complète, temps passé, écrans, amis, IA, plantages.</p>
         <input class="search" id="playerSearch" type="search" placeholder="Chercher un prénom ou un e-mail…" autocomplete="off">
+        <label class="meta" id="testersWrap" style="display:block;margin:0 0 12px"><input type="checkbox" id="hideTesters" checked> Cacher les testeurs (comptes d'avant la sortie)</label>
         <div class="scroll"><table id="playersTable"></table></div>
       </section>
     </div>
@@ -623,6 +629,10 @@ async function load() {
   loading = false;
   // Vrais inscrits sans les comptes de test (Tools/launch_users.sql) : remplace les chiffres d'inscription
   if (!real.error && overview.data) Object.assign(overview.data.users, real.data);
+  TESTERS = real.error ? null : new Set(real.data.tester_ids);
+  $("testersWrap").classList.toggle("hidden", !TESTERS);
+  if (real.error || !real.data.latest) failed("realTable", "Pas encore disponible : relance Tools/launch_users.sql dans Supabase (SQL Editor).");
+  else renderReal(real.data.latest);
   if (overview.error && (overview.error.message || "").includes("not_admin")) {
     $("deniedText").textContent = "Le compte " + (session.user.email || "") + " n'est pas administrateur.";
     return screen("denied");
@@ -1012,10 +1022,33 @@ const PHONES = { "iPhone12,1": "iPhone 11", "iPhone12,3": "iPhone 11 Pro", "iPho
   "iPhone18,3": "iPhone 17", "iPhone18,1": "iPhone 17 Pro", "iPhone18,2": "iPhone 17 Pro Max", "iPhone18,4": "iPhone Air" };
 const phone = d => d ? (PHONES[d] ? PHONES[d] + " (" + d + ")" : d) : "—";
 
+// ---------- Les vrais inscrits (Tools/launch_users.sql) ----------
+let TESTERS = null;
+function renderReal(list) {
+  const t = $("realTable"); t.replaceChildren();
+  const heads = ["Personne", "Inscrit le", "Avec", "Dernière connexion"];
+  const tr = el("tr"); heads.forEach(h => tr.append(el("th", null, h)));
+  const head = el("thead"); head.append(tr); t.append(head);
+  const body = el("tbody");
+  for (const p of list) {
+    const r = el("tr", "click");
+    r.addEventListener("click", () => openPerson(p.id));
+    const name = el("td"); name.append(el("b", null, p.first_name || (p.email || "?").split("@")[0])); name.append(el("div", "meta", p.email || "(e-mail caché par Apple)"));
+    name.lastChild.style.cssText = "color:var(--sage);font-size:12px";
+    r.append(name, el("td", null, date(p.at)), el("td", null, PROVIDERS[p.provider] || p.provider), el("td", null, ago(p.last_sign_in)));
+    body.append(r);
+  }
+  if (!list.length) { const r = el("tr"); const td = el("td", "empty", "Pas encore de vrai inscrit. Ça arrive ! 💪"); td.colSpan = heads.length; r.append(td); body.append(r); }
+  t.append(body);
+}
+
 let playerQuery = "";
 $("playerSearch").addEventListener("input", e => { playerQuery = e.target.value.trim().toLowerCase(); if (ACT) renderPlayers(); });
+$("hideTesters").addEventListener("change", () => { if (ACT) renderPlayers(); });
 function renderPlayers() {
-  const list = ACT.people.filter(p => !playerQuery || (p.email || "").toLowerCase().includes(playerQuery) || (p.first_name || "").toLowerCase().includes(playerQuery));
+  const hide = TESTERS && $("hideTesters").checked;
+  const list = ACT.people.filter(p => !(hide && TESTERS.has(p.id)))
+    .filter(p => !playerQuery || (p.email || "").toLowerCase().includes(playerQuery) || (p.first_name || "").toLowerCase().includes(playerQuery));
   const t = $("playersTable"); t.replaceChildren();
   const heads = ["Joueur", "Dernière visite", "#Temps 30 j", "#Ouvertures 30 j", "#Jours actifs 30 j", "Écran préféré", "#Amis", "#IA", "#Plantages", "Version", "Inscrit"];
   const tr = el("tr"); heads.forEach(h => tr.append(el("th", h.startsWith("#") ? "r" : null, h.replace(/^#/, ""))));
