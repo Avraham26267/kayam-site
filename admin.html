@@ -205,6 +205,13 @@
     <div data-page="home">
       <div class="grid" id="homeTiles"></div>
       <section class="box">
+        <h2>Abonnements Kayam Pro</h2>
+        <p class="lead">Envoyé par Apple à chaque événement (nouvel abonné, essai, code d'offre, renouvellement, arrêt). Apple ne dit pas qui : « Abonnement » = les 4 derniers chiffres de l'abonnement Apple.</p>
+        <div class="grid" id="subTiles"></div>
+        <div class="scroll"><table id="subTable"></table></div>
+        <p class="lead" id="subLast"></p>
+      </section>
+      <section class="box">
         <h2>Les vrais inscrits</h2>
         <p class="lead">Chaque personne qui a créé un compte depuis la sortie (sans les testeurs), du plus récent au plus ancien. Touche une ligne pour ouvrir sa fiche.</p>
         <div class="scroll"><table id="realTable"></table></div>
@@ -621,10 +628,10 @@ async function load() {
   if (loading) return;
   loading = true;
   $("when").textContent = "Chargement…";
-  const [overview, ai, app, misses, ideas, activity, health, credit, real] = await Promise.all([
+  const [overview, ai, app, misses, ideas, activity, health, credit, real, subs] = await Promise.all([
     sb.rpc("admin_overview"), sb.rpc("admin_ai_usage"), sb.rpc("admin_app_usage"), sb.rpc("admin_food_misses"),
     sb.rpc("admin_dish_suggestions"), sb.rpc("admin_activity"), sb.rpc("admin_health"), sb.rpc("admin_ai_balance"),
-    sb.rpc("admin_real_users"),
+    sb.rpc("admin_real_users"), sb.rpc("admin_subscriptions"),
   ]);
   loading = false;
   // Vrais inscrits sans les comptes de test (Tools/launch_users.sql) : remplace les chiffres d'inscription
@@ -657,6 +664,8 @@ async function load() {
   else { HEALTH = health.data; renderHealth(); }
   if (credit.error) { CREDIT = null; $("creditTiles").replaceChildren(el("p", "err", "Pas encore disponible : lance Tools/ai_credit.sql dans Supabase (SQL Editor).")); }
   else { CREDIT = credit.data; renderCredit(); }
+  if (subs.error) { SUBS = null; $("subTiles").replaceChildren(el("p", "err", "Pas encore disponible : lance Tools/subscriptions.sql dans Supabase (SQL Editor).")); }
+  else { SUBS = subs.data; renderSubs(); }
   renderHome(overview.data, AI, app.data);
 }
 
@@ -712,8 +721,35 @@ $("refresh").addEventListener("click", load);
 sb.auth.onAuthStateChange(() => { setTimeout(load, 0); });
 
 // ---------- Résumé ----------
+// ---------- Abonnements (Tools/subscriptions.sql + fonction apple-notifications) ----------
+let SUBS = null;
+const SUB_TYPES = {
+  SUBSCRIBED: "s'est abonné", DID_RENEW: "renouvelé (payé)", OFFER_REDEEMED: "a utilisé une offre", DID_CHANGE_RENEWAL_STATUS: "renouvellement changé",
+  DID_CHANGE_RENEWAL_PREF: "change de formule", EXPIRED: "terminé", DID_FAIL_TO_RENEW: "paiement refusé", GRACE_PERIOD_EXPIRED: "délai de paiement fini",
+  REFUND: "remboursé", REFUND_DECLINED: "remboursement refusé", REVOKE: "retiré", PRICE_INCREASE: "hausse de prix", RENEWAL_EXTENDED: "prolongé",
+  TEST: "test d'Apple",
+};
+const SUB_SUBTYPES = { AUTO_RENEW_DISABLED: "a annulé (garde Pro jusqu'à la fin)", AUTO_RENEW_ENABLED: "a réactivé", INITIAL_BUY: "1re fois", RESUBSCRIBE: "se réabonne", VOLUNTARY: "annulé par lui", BILLING_RETRY: "paiement raté" };
+const offerName = e => e.offer_type === 3 ? "🎟 code « " + (e.offer || "?") + " »" : e.offer_type === 1 ? "essai gratuit" : e.offer_type === 4 ? "offre de reconquête" : e.offer_type === 2 ? "promo" : "";
+const subPrice = e => e.price ? (e.price / 1000).toLocaleString("fr-FR", { style: "currency", currency: e.currency || "EUR" }) : e.type === "TEST" ? "" : "0";
+function renderSubs() {
+  const s = SUBS;
+  tiles("subTiles", [
+    [num(s.paying), "paient en ce moment", num(s.paying_monthly) + " au mois · " + num(s.paying_yearly) + " à l'année", true],
+    [num(s.code_now), "Pro grâce à un code", num(s.codes_used) + " code(s) utilisé(s) depuis le début"],
+    [num(s.trial_now), "en essai gratuit (7 jours)"],
+    [num(s.paid_ever), "ont déjà payé au moins une fois"],
+  ]);
+  const rows = s.recent.map(e => [date(e.at), (SUB_TYPES[e.type] || e.type) + (e.subtype ? " · " + (SUB_SUBTYPES[e.subtype] || e.subtype) : ""),
+    e.product ? (e.product.endsWith("yearly") ? "Année" : "Mois") : "", offerName(e), subPrice(e), e.sub ? "…" + e.sub : ""]);
+  table("subTable", ["Quand", "Quoi", "Formule", "Offre", "#Prix", "Abonnement"], rows);
+  $("subLast").textContent = s.last_event ? "Dernier message d'Apple : " + date(s.last_event) + (s.sandbox_events ? " · " + num(s.sandbox_events) + " message(s) de test (TestFlight) pas comptés" : "")
+    : "Apple n'a encore rien envoyé. Vérifie l'URL dans App Store Connect (Notifications du serveur App Store).";
+}
+
 function renderHome(o, ai, app) {
   const items = [];
+  if (SUBS) items.push([num(SUBS.paying), "abonnés qui paient", num(SUBS.code_now) + " Pro par code · " + num(SUBS.trial_now) + " en essai", true]);
   if (o) {
     items.push([num(o.users.total), o.users.testers != null ? "vrais inscrits" : "comptes au total", "+" + num(o.users.week) + " en 7 jours · +" + num(o.users.today) + " aujourd'hui"
       + (o.users.testers != null ? " · " + num(o.users.testers) + " testeurs pas comptés" : ""), true]);
@@ -845,7 +881,7 @@ $("topupForm").addEventListener("submit", async e => {
 // Limites par jour (les mêmes que Tools/security_fix.sql) et usage « normal » estimé
 const LIMITS = { voice: 20, photo: 10, coach: 2 };
 const NORMAL = { voice: 3, photo: 2, coach: 0.3 };
-const NET_PER_MONTH = 3.5; // abonnement 4,99 € → ~3,50 $ après TVA et Apple (ordre de grandeur)
+const NET_PER_MONTH = 5.0; // abonnement 6,99 € → ~4,95 € (~5 $) après TVA et Apple (ordre de grandeur)
 function renderPerUser() {
   const all = AI.totals.filter(t => t.period === "all");
   const avg = f => { const r = all.find(t => t.feature === f); return r && r.measured ? Number(r.cost) / r.measured : null; };
