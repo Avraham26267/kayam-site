@@ -643,10 +643,11 @@ async function load() {
   if (!real.error && overview.data) Object.assign(overview.data.users, real.data);
   TESTERS = real.error ? null : new Set(real.data.tester_ids);
   $("testersWrap").classList.toggle("hidden", !TESTERS);
-  if (real.error || !real.data.latest) failed("realTable", "Pas encore disponible : relance Tools/launch_users.sql dans Supabase (SQL Editor).");
-  else renderReal(real.data.latest);
+  HEARD = heard.error ? null : (heard.data.by_user || {});
   if (heard.error) failed("sourceTable", "Pas encore disponible : lance Tools/heard_from.sql dans Supabase (SQL Editor).");
   else renderSources(heard.data);
+  if (real.error || !real.data.latest) failed("realTable", "Pas encore disponible : relance Tools/launch_users.sql dans Supabase (SQL Editor).");
+  else renderReal(real.data.latest);
   if (overview.error && (overview.error.message || "").includes("not_admin")) {
     $("deniedText").textContent = "Le compte " + (session.user.email || "") + " n'est pas administrateur.";
     return screen("denied");
@@ -1066,6 +1067,7 @@ const PHONES = { "iPhone12,1": "iPhone 11", "iPhone12,3": "iPhone 11 Pro", "iPho
 const phone = d => d ? (PHONES[d] ? PHONES[d] + " (" + d + ")" : d) : "—";
 
 // ---------- D'où viennent les inscrits (Tools/heard_from.sql) ----------
+let HEARD = null;
 const SOURCES = { tiktok: "TikTok", instagram: "Instagram", friend: "Un ami", appStore: "Recherche App Store", other: "Autre", none: "Pas demandé" };
 function renderSources(d) {
   const week = Object.fromEntries((d.week || []).map(s => [s.source, s.count]));
@@ -1078,7 +1080,7 @@ function renderSources(d) {
 let TESTERS = null;
 function renderReal(list) {
   const t = $("realTable"); t.replaceChildren();
-  const heads = ["Personne", "Inscrit le", "Avec", "Dernière connexion"];
+  const heads = ["Personne", "Inscrit le", "Avec", "Venu par", "Dernière connexion"];
   const tr = el("tr"); heads.forEach(h => tr.append(el("th", null, h)));
   const head = el("thead"); head.append(tr); t.append(head);
   const body = el("tbody");
@@ -1087,7 +1089,8 @@ function renderReal(list) {
     r.addEventListener("click", () => openPerson(p.id));
     const name = el("td"); name.append(el("b", null, p.first_name || (p.email || "?").split("@")[0])); name.append(el("div", "meta", p.email || "(e-mail caché par Apple)"));
     name.lastChild.style.cssText = "color:var(--sage);font-size:12px";
-    r.append(name, el("td", null, date(p.at)), el("td", null, PROVIDERS[p.provider] || p.provider), el("td", null, ago(p.last_sign_in)));
+    const heardFrom = HEARD ? (SOURCES[HEARD[p.id]] || HEARD[p.id] || "Pas demandé") : "—";
+    r.append(name, el("td", null, date(p.at)), el("td", null, PROVIDERS[p.provider] || p.provider), el("td", null, heardFrom), el("td", null, ago(p.last_sign_in)));
     body.append(r);
   }
   if (!list.length) { const r = el("tr"); const td = el("td", "empty", "Pas encore de vrai inscrit. Ça arrive ! 💪"); td.colSpan = heads.length; r.append(td); body.append(r); }
