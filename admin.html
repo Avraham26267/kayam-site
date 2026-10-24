@@ -217,6 +217,11 @@
         <div class="scroll"><table id="realTable"></table></div>
       </section>
       <section class="box">
+        <h2>D'où viennent les inscrits</h2>
+        <p class="lead">La réponse à « Comment as-tu connu Kayam ? », à la fin des questions (depuis la version 1.1.2). « Pas demandé » = inscrit avant la question.</p>
+        <div class="scroll"><table id="sourceTable"></table></div>
+      </section>
+      <section class="box">
         <h2>Nouveaux comptes</h2>
         <p class="lead">Les inscriptions des 14 derniers jours.</p>
         <div class="bars" id="signupBars"></div><div class="axis" id="signupAxis"></div>
@@ -628,10 +633,10 @@ async function load() {
   if (loading) return;
   loading = true;
   $("when").textContent = "Chargement…";
-  const [overview, ai, app, misses, ideas, activity, health, credit, real, subs] = await Promise.all([
+  const [overview, ai, app, misses, ideas, activity, health, credit, real, subs, heard] = await Promise.all([
     sb.rpc("admin_overview"), sb.rpc("admin_ai_usage"), sb.rpc("admin_app_usage"), sb.rpc("admin_food_misses"),
     sb.rpc("admin_dish_suggestions"), sb.rpc("admin_activity"), sb.rpc("admin_health"), sb.rpc("admin_ai_balance"),
-    sb.rpc("admin_real_users"), sb.rpc("admin_subscriptions"),
+    sb.rpc("admin_real_users"), sb.rpc("admin_subscriptions"), sb.rpc("admin_heard_from"),
   ]);
   loading = false;
   // Vrais inscrits sans les comptes de test (Tools/launch_users.sql) : remplace les chiffres d'inscription
@@ -640,6 +645,8 @@ async function load() {
   $("testersWrap").classList.toggle("hidden", !TESTERS);
   if (real.error || !real.data.latest) failed("realTable", "Pas encore disponible : relance Tools/launch_users.sql dans Supabase (SQL Editor).");
   else renderReal(real.data.latest);
+  if (heard.error) failed("sourceTable", "Pas encore disponible : lance Tools/heard_from.sql dans Supabase (SQL Editor).");
+  else renderSources(heard.data);
   if (overview.error && (overview.error.message || "").includes("not_admin")) {
     $("deniedText").textContent = "Le compte " + (session.user.email || "") + " n'est pas administrateur.";
     return screen("denied");
@@ -1057,6 +1064,15 @@ const PHONES = { "iPhone12,1": "iPhone 11", "iPhone12,3": "iPhone 11 Pro", "iPho
   "iPhone17,3": "iPhone 16", "iPhone17,4": "iPhone 16 Plus", "iPhone17,1": "iPhone 16 Pro", "iPhone17,2": "iPhone 16 Pro Max", "iPhone17,5": "iPhone 16e",
   "iPhone18,3": "iPhone 17", "iPhone18,1": "iPhone 17 Pro", "iPhone18,2": "iPhone 17 Pro Max", "iPhone18,4": "iPhone Air" };
 const phone = d => d ? (PHONES[d] ? PHONES[d] + " (" + d + ")" : d) : "—";
+
+// ---------- D'où viennent les inscrits (Tools/heard_from.sql) ----------
+const SOURCES = { tiktok: "TikTok", instagram: "Instagram", friend: "Un ami", appStore: "Recherche App Store", other: "Autre", none: "Pas demandé" };
+function renderSources(d) {
+  const week = Object.fromEntries((d.week || []).map(s => [s.source, s.count]));
+  const total = d.sources.reduce((n, s) => n + s.count, 0);
+  table("sourceTable", ["Venu par", "#Inscrits", "#Cette semaine", "#Part"],
+    d.sources.map(s => [SOURCES[s.source] || s.source, num(s.count), num(week[s.source] || 0), total ? Math.round(s.count / total * 100) + " %" : "—"]));
+}
 
 // ---------- Les vrais inscrits (Tools/launch_users.sql) ----------
 let TESTERS = null;
