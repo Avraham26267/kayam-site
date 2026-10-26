@@ -205,6 +205,11 @@
     <div data-page="home">
       <div class="grid" id="homeTiles"></div>
       <section class="box">
+        <h2>Passés Pro dans l'app 💎</h2>
+        <p class="lead" id="buysLead">Qui a acheté Pro avec le bouton de l'app, et quand (essai gratuit compris). Pas les codes d'offre : ils se valident dans l'App Store. Touche une ligne pour ouvrir sa fiche.</p>
+        <div class="scroll"><table id="buysTable"></table></div>
+      </section>
+      <section class="box">
         <h2>Abonnements Kayam Pro</h2>
         <p class="lead">Envoyé par Apple à chaque événement (nouvel abonné, essai, code d'offre, renouvellement, arrêt). Apple ne dit pas qui : « Abonnement » = les 4 derniers chiffres de l'abonnement Apple.</p>
         <div class="grid" id="subTiles"></div>
@@ -638,11 +643,11 @@ async function load() {
   if (loading) return;
   loading = true;
   $("when").textContent = "Chargement…";
-  const [overview, ai, app, misses, ideas, activity, health, credit, real, subs, heard, deleted] = await Promise.all([
+  const [overview, ai, app, misses, ideas, activity, health, credit, real, subs, heard, deleted, buys] = await Promise.all([
     sb.rpc("admin_overview"), sb.rpc("admin_ai_usage"), sb.rpc("admin_app_usage"), sb.rpc("admin_food_misses"),
     sb.rpc("admin_dish_suggestions"), sb.rpc("admin_activity"), sb.rpc("admin_health"), sb.rpc("admin_ai_balance"),
     sb.rpc("admin_real_users"), sb.rpc("admin_subscriptions"), sb.rpc("admin_heard_from"),
-    sb.rpc("admin_deleted_accounts"),
+    sb.rpc("admin_deleted_accounts"), sb.rpc("admin_pro_purchases"),
   ]);
   loading = false;
   // Vrais inscrits sans les comptes de test (Tools/launch_users.sql) : remplace les chiffres d'inscription
@@ -654,6 +659,8 @@ async function load() {
   else renderSources(heard.data);
   if (deleted.error) failed("deletedTable", "Pas encore disponible : lance Tools/deleted_accounts.sql dans Supabase (SQL Editor).");
   else renderDeleted(deleted.data);
+  if (buys.error) failed("buysTable", "Pas encore disponible : lance Tools/pro_purchases.sql dans Supabase (SQL Editor).");
+  else renderBuys(buys.data);
   if (real.error || !real.data.latest) failed("realTable", "Pas encore disponible : relance Tools/launch_users.sql dans Supabase (SQL Editor).");
   else renderReal(real.data.latest);
   if (overview.error && (overview.error.message || "").includes("not_admin")) {
@@ -1084,6 +1091,27 @@ function renderSources(d) {
     d.sources.map(s => [SOURCES[s.source] || s.source, num(s.count), num(week[s.source] || 0), total ? Math.round(s.count / total * 100) + " %" : "—"]));
 }
 
+// ---------- Passés Pro dans l'app (Tools/pro_purchases.sql) ----------
+function renderBuys(d) {
+  $("buysLead").textContent = num(d.total) + " personne(s) passée(s) Pro avec le bouton de l'app, dont " + num(d.week) + " cette semaine (sans les testeurs). Essai gratuit compris ; pas les codes d'offre (validés dans l'App Store). Touche une ligne pour ouvrir sa fiche.";
+  const t = $("buysTable"); t.replaceChildren();
+  const heads = ["Personne", "Passé Pro le", "Il y a"];
+  const tr = el("tr"); heads.forEach(h => tr.append(el("th", null, h)));
+  const head = el("thead"); head.append(tr); t.append(head);
+  const body = el("tbody");
+  for (const p of d.list) {
+    const r = el("tr", "click");
+    r.addEventListener("click", () => openPerson(p.id));
+    const name = el("td"); name.append(el("b", null, p.first_name || (p.email || "?").split("@")[0]));
+    name.append(el("div", "meta", (p.email || "(e-mail caché par Apple)") + (p.is_tester ? " · testeur" : "")));
+    name.lastChild.style.cssText = "color:var(--sage);font-size:12px";
+    r.append(name, el("td", null, date(p.at)), el("td", null, ago(p.at)));
+    body.append(r);
+  }
+  if (!d.list.length) { const r = el("tr"); const td = el("td", "empty", "Personne pour l'instant."); td.colSpan = heads.length; r.append(td); body.append(r); }
+  t.append(body);
+}
+
 // ---------- Comptes supprimés (Tools/deleted_accounts.sql) ----------
 function renderDeleted(d) {
   $("deletedLead").textContent = "Qui a supprimé son compte, et quand. " + num(d.total) + " vrai(s) compte(s) supprimé(s), dont " + num(d.week) + " cette semaine (sans les testeurs).";
@@ -1166,7 +1194,8 @@ async function openPerson(id) {
   if (error || !data || !data.profile) { box.replaceChildren(close, el("p", "err", "Impossible de charger cette fiche" + (error ? " : " + error.message : "."))); return; }
   const p = data.profile, st = data.stats;
   const parts = [close, el("h2", "name", p.first_name || (p.email || "?").split("@")[0]),
-    el("p", "sub", (p.email || "") + " · inscrit le " + dayOnly(p.created_at) + " avec " + (PROVIDERS[p.provider] || p.provider) + " · dernière visite " + ago(st.last_seen || p.last_sign_in_at))];
+    el("p", "sub", (p.email || "") + " · inscrit le " + dayOnly(p.created_at) + " avec " + (PROVIDERS[p.provider] || p.provider) + " · dernière visite " + ago(st.last_seen || p.last_sign_in_at)
+      + (HEARD ? " · venu par " + (SOURCES[HEARD[id]] || HEARD[id] || "pas demandé") : ""))];
   const g = el("div", "grid");
   [[dur(st.seconds), "dans l'app en tout", num(st.sessions) + " ouvertures", true],
    [dur(st.avg_session_s), "par ouverture"],
