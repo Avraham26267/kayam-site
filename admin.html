@@ -227,6 +227,11 @@
         <div class="scroll"><table id="sourceTable"></table></div>
       </section>
       <section class="box">
+        <h2>Intérêt course</h2>
+        <p class="lead">La réponse à « Une option course dans Kayam, ça t'intéresserait ? » (question facultative, écran « Tu fais de la muscu ? »). Rien de la course n'existe encore : on mesure l'envie avant de la construire. « Part des réponses » = sans compter ceux qui n'ont pas répondu.</p>
+        <div class="scroll"><table id="runningTable"></table></div>
+      </section>
+      <section class="box">
         <h2>Comptes supprimés</h2>
         <p class="lead" id="deletedLead">Qui a supprimé son compte, et quand (depuis que Tools/deleted_accounts.sql est lancé). Du plus récent au plus ancien.</p>
         <div class="scroll"><table id="deletedTable"></table></div>
@@ -643,11 +648,11 @@ async function load() {
   if (loading) return;
   loading = true;
   $("when").textContent = "Chargement…";
-  const [overview, ai, app, misses, ideas, activity, health, credit, real, subs, heard, deleted, buys] = await Promise.all([
+  const [overview, ai, app, misses, ideas, activity, health, credit, real, subs, heard, deleted, buys, running] = await Promise.all([
     sb.rpc("admin_overview"), sb.rpc("admin_ai_usage"), sb.rpc("admin_app_usage"), sb.rpc("admin_food_misses"),
     sb.rpc("admin_dish_suggestions"), sb.rpc("admin_activity"), sb.rpc("admin_health"), sb.rpc("admin_ai_balance"),
     sb.rpc("admin_real_users"), sb.rpc("admin_subscriptions"), sb.rpc("admin_heard_from"),
-    sb.rpc("admin_deleted_accounts"), sb.rpc("admin_pro_purchases"),
+    sb.rpc("admin_deleted_accounts"), sb.rpc("admin_pro_purchases"), sb.rpc("admin_running_interest"),
   ]);
   loading = false;
   // Vrais inscrits sans les comptes de test (Tools/launch_users.sql) : remplace les chiffres d'inscription
@@ -657,6 +662,8 @@ async function load() {
   HEARD = heard.error ? null : (heard.data.by_user || {});
   if (heard.error) failed("sourceTable", "Pas encore disponible : lance Tools/heard_from.sql dans Supabase (SQL Editor).");
   else renderSources(heard.data);
+  if (running.error) failed("runningTable", "Pas encore disponible : lance Tools/running_interest.sql dans Supabase (SQL Editor).");
+  else renderRunning(running.data);
   if (deleted.error) failed("deletedTable", "Pas encore disponible : lance Tools/deleted_accounts.sql dans Supabase (SQL Editor).");
   else renderDeleted(deleted.data);
   if (buys.error) failed("buysTable", "Pas encore disponible : lance Tools/pro_purchases.sql dans Supabase (SQL Editor).");
@@ -1091,6 +1098,18 @@ function renderSources(d) {
     d.sources.map(s => [SOURCES[s.source] || s.source, num(s.count), num(week[s.source] || 0), total ? Math.round(s.count / total * 100) + " %" : "—"]));
 }
 
+// ---------- Intérêt course (Tools/running_interest.sql) ----------
+const RUNNING = { runs: "Oui, je cours déjà", wantsTo: "Oui, je voudrais m'y mettre", no: "Non, pas pour moi", none: "Pas répondu" };
+function renderRunning(d) {
+  const order = ["runs", "wantsTo", "no", "none"];
+  const counts = Object.fromEntries((d.answers || []).map(a => [a.answer, a.count]));
+  const total = order.reduce((n, k) => n + (counts[k] || 0), 0);
+  const answered = total - (counts.none || 0);
+  table("runningTable", ["Réponse", "#Inscrits", "#Part de tous", "#Part des réponses"],
+    order.map(k => [RUNNING[k], num(counts[k] || 0), total ? Math.round((counts[k] || 0) / total * 100) + " %" : "—",
+      k === "none" ? "—" : (answered ? Math.round((counts[k] || 0) / answered * 100) + " %" : "—")]));
+}
+
 // ---------- Passés Pro dans l'app (Tools/pro_purchases.sql) ----------
 function renderBuys(d) {
   $("buysLead").textContent = num(d.total) + " personne(s) passée(s) Pro avec le bouton de l'app, dont " + num(d.week) + " cette semaine (sans les testeurs). Essai gratuit compris ; pas les codes d'offre (validés dans l'App Store). Touche une ligne pour ouvrir sa fiche.";
@@ -1130,9 +1149,24 @@ function renderDeleted(d) {
 
 // ---------- Les vrais inscrits (Tools/launch_users.sql) ----------
 let TESTERS = null;
+// 16 nov. (sa demande : « je vois 31 utilisateurs, je sais qu'il n'y en a pas 31 ») : ranger un compte parmi les testeurs
+// (il sort des chiffres) ou le remettre. Fonction Supabase admin_set_tester (Tools/admin_set_tester.sql).
+function testerButton(p, isTester) {
+  const b = el("button", "ghost small", isTester ? "↩︎ Compter à nouveau" : "🚫 Ne pas compter");
+  b.addEventListener("click", async e => {
+    e.stopPropagation();
+    const who = p.email || p.first_name || "ce compte";
+    if (!isTester && !confirm("Ne plus compter " + who + " dans les chiffres ?\n(Le compte n'est pas supprimé. Tu pourras le remettre.)")) return;
+    b.disabled = true; b.textContent = "…";
+    const { error } = await sb.rpc("admin_set_tester", { p_user: p.id, p_tester: !isTester });
+    if (error) { alert("Pas encore disponible : lance Tools/admin_set_tester.sql dans Supabase (SQL Editor).\n\n" + error.message); b.disabled = false; b.textContent = isTester ? "↩︎ Compter à nouveau" : "🚫 Ne pas compter"; return; }
+    load();
+  });
+  return b;
+}
 function renderReal(list) {
   const t = $("realTable"); t.replaceChildren();
-  const heads = ["Personne", "Inscrit le", "Avec", "Venu par", "Dernière connexion"];
+  const heads = ["Personne", "Inscrit le", "Avec", "Venu par", "Dernière connexion", "Compter ?"];
   const tr = el("tr"); heads.forEach(h => tr.append(el("th", null, h)));
   const head = el("thead"); head.append(tr); t.append(head);
   const body = el("tbody");
@@ -1143,6 +1177,7 @@ function renderReal(list) {
     name.lastChild.style.cssText = "color:var(--sage);font-size:12px";
     const heardFrom = HEARD ? (SOURCES[HEARD[p.id]] || HEARD[p.id] || "Pas demandé") : "—";
     r.append(name, el("td", null, date(p.at)), el("td", null, PROVIDERS[p.provider] || p.provider), el("td", null, heardFrom), el("td", null, ago(p.last_sign_in)));
+    const act = el("td"); act.append(testerButton(p, false)); r.append(act);
     body.append(r);
   }
   if (!list.length) { const r = el("tr"); const td = el("td", "empty", "Pas encore de vrai inscrit. Ça arrive ! 💪"); td.colSpan = heads.length; r.append(td); body.append(r); }
@@ -1166,6 +1201,8 @@ function renderPlayers() {
     r.addEventListener("click", () => openPerson(p.id));
     const name = el("td"); name.append(el("b", null, p.first_name || (p.email || "?").split("@")[0])); name.append(el("div", "meta", p.email || ""));
     name.lastChild.style.cssText = "color:var(--sage);font-size:12px";
+    // 16 nov. : bouton « Ne pas compter » / « Compter à nouveau » directement dans la liste
+    if (TESTERS) { const b = testerButton(p, TESTERS.has(p.id)); b.style.marginTop = "6px"; name.append(el("div")); name.lastChild.append(b); }
     r.append(name);
     [ago(p.last_seen), dur(p.seconds_month), num(p.sessions_month), num(p.days_month) + " / 30", p.top_screen ? screenName(p.top_screen) : "—",
      num(p.friends), num(p.ai_calls), p.crashes ? "💥 " + num(p.crashes) : "0", p.app_version || "—", dayOnly(p.signed_up)].forEach((v, i) => {
