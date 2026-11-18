@@ -9,12 +9,13 @@
 <meta name="theme-color" content="#F5F6F1">
 <link rel="icon" href="img/logo.png">
 <link rel="stylesheet" href="site.css">
+<style>.btn.store{background:var(--lime);color:var(--ink) !important;margin-top:12px}</style>
 </head>
 <body>
 <header class="topbar">
   <div class="wrap">
     <a class="brand" href="./"><img src="img/logo.png" alt=""><b>kayam<span>.</span></b></a>
-    <a class="pill" href="./#fin" id="topcta">Préviens-moi</a>
+    <a class="pill" href="https://apps.apple.com/app/id6819856907" id="topcta">Télécharger</a>
   </div>
 </header>
 <main class="narrow">
@@ -22,6 +23,7 @@
   <p class="sub" id="sub"></p>
   <div class="card"><div class="code" id="code"></div></div>
   <a class="btn" id="open" href="#"></a>
+  <a class="btn store" id="store" href="https://apps.apple.com/app/id6819856907"></a>
   <p class="note" id="note"></p>
 </main>
 <footer>
@@ -37,19 +39,18 @@
 </footer>
 <script>
 document.getElementById("year").textContent = new Date().getFullYear();
-if ((navigator.language || "fr").slice(0, 2) !== "fr") {
-  document.getElementById("topcta").textContent = "Notify me";
-  document.getElementById("flink1").textContent = "Privacy";
-}
+const topLang = (navigator.language || "en").slice(0, 2);
+document.getElementById("topcta").textContent = topLang === "fr" ? "Télécharger" : topLang === "he" ? "הורדה" : "Download";
+if (topLang !== "fr") document.getElementById("flink1").textContent = "Privacy";
 </script>
 <script>
 const lang = (navigator.language || "en").slice(0, 2);
 const T = {
-  fr: { title: "Rejoins mon cercle Kayam", sub: "On s'encourage entre amis : qui s'est entraîné aujourd'hui, et un 👊 pour se motiver.", open: "Ouvrir dans Kayam", note: "Ou tape ce code dans Kayam : Progrès → Amis. Pas encore Kayam ? <a href=\"./#fin\">Préviens-moi au lancement</a>." },
-  he: { title: "הצטרף למעגל ה־Kayam שלי", sub: "מעודדים אחד את השני: מי התאמן היום, ו־👊 למוטיבציה.", open: "פתח ב־Kayam", note: "או הקלד את הקוד ב־Kayam: התקדמות ← חברים. עוד אין לך Kayam? <a href=\"./#fin\">קבל עדכון בהשקה</a>." },
-  en: { title: "Join my Kayam circle", sub: "We cheer each other on: who trained today, and a 👊 to stay motivated.", open: "Open in Kayam", note: "Or enter this code in Kayam: Progress → Friends. No Kayam yet? <a href=\"./#fin\">Get notified at launch</a>." }
+  fr: { title: "Rejoins mon cercle Kayam", sub: "On s'encourage entre amis : qui s'est entraîné aujourd'hui, et un 👊 pour se motiver.", open: "Ouvrir dans Kayam", note: "Une fois Kayam installé, reviens sur cette page et touche « Ouvrir dans Kayam ». Tu peux aussi taper ce code dans Progrès → Amis.", store: "Pas encore Kayam ? Télécharger" },
+  he: { title: "הצטרף למעגל ה־Kayam שלי", sub: "מעודדים אחד את השני: מי התאמן היום, ו־👊 למוטיבציה.", open: "פתח ב־Kayam", note: "אחרי שהורדת, תחזור לכאן ותלחץ על ״פתח ב־Kayam״. אפשר גם להקליד את הקוד ב: התקדמות ← חברים.", store: "אין לך Kayam? להורדה" },
+  en: { title: "Join my Kayam circle", sub: "We cheer each other on: who trained today, and a 👊 to stay motivated.", open: "Open in Kayam", note: "Once Kayam is installed, come back to this page and tap “Open in Kayam”. You can also enter this code in Progress → Friends.", store: "No Kayam yet? Download" }
 }[lang] || null;
-const t = T || { title: "Join my Kayam circle", sub: "We cheer each other on: who trained today, and a 👊 to stay motivated.", open: "Open in Kayam", note: "Or enter this code in Kayam: Progress → Friends. No Kayam yet? <a href=\"./#fin\">Get notified at launch</a>." };
+const t = T || { title: "Join my Kayam circle", sub: "We cheer each other on: who trained today, and a 👊 to stay motivated.", open: "Open in Kayam", note: "Once Kayam is installed, come back to this page and tap “Open in Kayam”. You can also enter this code in Progress → Friends.", store: "No Kayam yet? Download" };
 if (lang === "he") document.documentElement.dir = "rtl";
 const code = location.hash.slice(1).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
 const $ = id => document.getElementById(id);
@@ -58,7 +59,8 @@ $("sub").textContent = t.sub;
 $("code").textContent = code || "—";
 $("open").textContent = t.open;
 $("open").href = "kayam://invite/" + code;
-$("note").innerHTML = t.note;
+$("note").textContent = t.note;
+$("store").textContent = t.store;
 </script>
 </body>
 </html>
