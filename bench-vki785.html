@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kayam · Bench Booster</title>
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F5F6F1">
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="site.css">
+<style>
+  .kicker { margin-bottom:6px; }
+  .ex { display:flex; gap:14px; align-items:flex-start; }
+  .num { flex:none; width:38px; height:38px; border-radius:12px; background:var(--lime); color:var(--ink);
+         font-weight:900; font-size:18px; display:grid; place-items:center; }
+  .ex h2 { margin:2px 0 4px; }
+  .dose { display:inline-block; font-weight:800; font-size:14px; color:var(--green); margin-bottom:6px; }
+  .cue { margin:0; color:var(--sage); font-size:15px; line-height:1.45; }
+  .how { background:var(--dark); color:var(--cream); }
+  .how h2 { color:var(--lime); }
+  .how p { margin:6px 0 0; font-size:15px; line-height:1.5; }
+  .btn.alt { background:var(--lime); color:var(--ink) !important; margin-top:10px; }
+  main.narrow { padding-bottom:40px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="img/logo.png" alt=""><b>kayam<span>.</span></b></a>
+    <a class="pill" id="topcta" href="https://apps.apple.com/app/id6819856907"></a>
+  </div>
+</header>
+<main class="narrow">
+  <p class="kicker" id="kicker"></p>
+  <h1 id="title"></h1>
+  <p class="sub" id="sub"></p>
+  <div id="list"></div>
+  <div class="card how">
+    <h2 id="howT"></h2>
+    <p id="how1"></p>
+    <p id="how2"></p>
+  </div>
+  <a class="btn" id="get" href="https://apps.apple.com/app/id6819856907"></a>
+  <a class="btn alt" id="open" href="kayam://routine#q1YqU7Iy1FEqUrKKrlbKU7JSckrNS85QcMrPLy5JLVLSUUoFy1TAZQKKUouLFTScEouSUnNyNIEqisEqCpSszGp1cNCxYBsMTQ1AIiCzPPOSczLzUhVQzHQpzU3CMNTQAGoKMgNiniXcOOec_OJUBfeizAJkE5GNsYBqRtDoZgSUFmcohBag2G0Ks9IUqtwMaDcQAgA"></a>
+  <p class="note" id="note"></p>
+</main>
+<footer>
+  <div class="wrap row">
+    <div>© <span id="year">2026</span> Kayam</div>
+    <div class="links">
+      <a href="privacy.html" id="flink1">Privacy</a>
+      <a href="mailto:kayam.support@gmail.com">Contact</a>
+    </div>
+  </div>
+  <div class="bigname" aria-hidden="true">kayam<span>.</span></div>
+</footer>
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+const TXT = {
+  en: {
+    cta: "Get the app", kicker: "FREE · BENCH", title: "Bench Booster",
+    sub: "Do it 2 times a week, with at least 2 days of rest between. About 45 minutes.",
+    ex: [
+      ["Bench press (barbell)", "4 × 6 · rest 2–3 min", "Shoulder blades squeezed, feet planted. Bar to mid-chest, then press."],
+      ["Incline bench press (dumbbell)", "3 × 10 · rest 90 s", "Bench at about 30°. Control the way down."],
+      ["Close grip bench press", "3 × 8 · rest 90 s", "Hands a bit closer than shoulders, elbows close to the body. Builds the triceps that finish the press."],
+      ["Push-ups", "2 × 15 · rest 60 s", "Body in one straight line. Slow and clean."]
+    ],
+    howT: "The honest part",
+    how1: "Your bench goes up when you add a little each week: 1 more rep, or 2.5 kg more when all your reps are clean.",
+    how2: "Sleep and enough protein matter as much as the program. No shortcut.",
+    get: "Get Kayam (free)", open: "I have Kayam → add this workout",
+    note: "Kayam tells you what to lift each session and tracks your progress, for any goal."
+  },
+  fr: {
+    cta: "L'app", kicker: "GRATUIT · DÉVELOPPÉ COUCHÉ", title: "Bench Booster",
+    sub: "2 fois par semaine, avec au moins 2 jours de repos entre les deux. Environ 45 minutes.",
+    ex: [
+      ["Développé couché (barre)", "4 × 6 · repos 2–3 min", "Omoplates serrées, pieds bien posés. La barre descend au milieu de la poitrine, puis tu pousses."],
+      ["Développé incliné (haltères)", "3 × 10 · repos 90 s", "Banc à environ 30°. Contrôle la descente."],
+      ["Développé couché prise serrée", "3 × 8 · repos 90 s", "Mains un peu plus serrées que les épaules, coudes près du corps. Renforce les triceps."],
+      ["Pompes", "2 × 15 · repos 60 s", "Corps bien droit. Lent et propre."]
+    ],
+    howT: "La partie honnête",
+    how1: "Ton développé couché monte si tu ajoutes un peu chaque semaine : 1 répétition de plus, ou 2,5 kg quand toutes tes répétitions sont propres.",
+    how2: "Le sommeil et assez de protéines comptent autant que le programme. Pas de raccourci.",
+    get: "Télécharger Kayam (gratuit)", open: "J'ai Kayam → ajouter cette séance",
+    note: "Kayam te dit quoi soulever à chaque séance et suit tes progrès, quel que soit ton objectif."
+  },
+  he: {
+    cta: "להורדה", kicker: "חינם · בנץ׳", title: "Bench Booster",
+    sub: "פעמיים בשבוע, עם לפחות יומיים מנוחה באמצע. בערך 45 דקות.",
+    ex: [
+      ["לחיצת חזה במוט", "4 × 6 · מנוחה 2–3 דק׳", "שכמות צמודות, רגליים נטועות ברצפה. המוט יורד לאמצע החזה ודוחפים."],
+      ["לחיצת חזה בשיפוע עם משקולות", "3 × 10 · מנוחה 90 שנ׳", "ספסל בערך על 30°. שולטים בירידה."],
+      ["לחיצת חזה אחיזה צרה", "3 × 8 · מנוחה 90 שנ׳", "ידיים קצת יותר צר מהכתפיים, מרפקים צמודים. בונה את הטרייספס."],
+      ["שכיבות סמיכה", "2 × 15 · מנוחה 60 שנ׳", "גוף בקו ישר. לאט ונקי."]
+    ],
+    howT: "החלק הכנה",
+    how1: "הבנץ׳ עולה כשמוסיפים קצת כל שבוע: עוד חזרה, או 2.5 ק״ג כשכל החזרות נקיות.",
+    how2: "שינה וחלבון חשובים בדיוק כמו התוכנית. אין קיצורי דרך.",
+    get: "להוריד את Kayam (חינם)", open: "יש לי Kayam ← להוסיף את האימון",
+    note: "Kayam אומרת לך כמה להרים בכל אימון ועוקבת אחרי ההתקדמות, לכל מטרה."
+  }
+};
+const lang = (navigator.language || "en").slice(0, 2);
+const T = TXT[lang] || TXT.en;
+if (lang === "he") document.documentElement.dir = "rtl";
+document.documentElement.lang = TXT[lang] ? lang : "en";
+const $ = id => document.getElementById(id);
+for (const k of ["kicker", "title", "sub", "howT", "how1", "how2", "get", "open", "note"]) $(k).textContent = T[k];
+$("topcta").textContent = T.cta;
+if (lang === "fr") $("flink1").textContent = "Confidentialité";
+T.ex.forEach(([name, dose, cue], i) => {
+  const card = document.createElement("div");
+  card.className = "card ex";
+  card.innerHTML = `<div class="num">${i + 1}</div><div><h2></h2><span class="dose"></span><p class="cue"></p></div>`;
+  card.querySelector("h2").textContent = name;
+  card.querySelector(".dose").textContent = dose;
+  card.querySelector(".cue").textContent = cue;
+  $("list").appendChild(card);
+});
+</script>
+</body>
+</html>
