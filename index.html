@@ -155,6 +155,27 @@
     *, *::before, *::after { animation:none !important; transition:none !important; }
     .chip, h1 .w, .js .rv { opacity:1 !important; transform:none !important; }
   }
+
+  /* ---------- Images ---------- */
+  .vband { position:relative; height:min(62vh, 560px); min-height:340px; overflow:hidden; background:#0B0D0B; }
+  .vband video, .vband img.poster { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .vband::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,13,11,.15), rgba(11,13,11,.65)); }
+  .vband .cap { position:absolute; z-index:1; left:0; right:0; bottom:0; padding:0 20px 44px; max-width:1120px; margin:0 auto; color:#fff; }
+  .vband h2 { font-size:44px; margin:0; letter-spacing:-1.2px; line-height:1.02; }
+  .vband h2 span { color:var(--lime); display:block; }
+  .fband { padding:64px 0 8px; }
+  .fband .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .fband img { width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:26px; transition:transform .6s cubic-bezier(.2,.8,.2,1); }
+  .fband img:hover { transform:scale(1.02) rotate(-.4deg); }
+  .fband p { font-size:26px; font-weight:800; letter-spacing:-.6px; line-height:1.15; margin:0 0 22px; max-width:640px; }
+  @media (min-width: 900px) {
+    .vband .cap { padding:0 40px 64px; }
+    .vband h2 { font-size:84px; letter-spacing:-3px; }
+    .fband { padding:96px 0 8px; }
+    .fband .grid { grid-template-columns:1.25fr 1fr; gap:20px; }
+    .fband img { aspect-ratio:auto; height:460px; }
+    .fband p { font-size:40px; letter-spacing:-1px; }
+  }
 </style>
 </head>
 <body id="top">
@@ -192,6 +213,11 @@
     </div>
   </div></div>
 
+  <section class="vband" aria-label="Kayam">
+    <video autoplay muted loop playsinline preload="metadata" poster="img/gym-poster.jpg"><source src="img/gym.mp4" type="video/mp4"></video>
+    <div class="cap"><h2 class="rv" data-i="vband" data-html>Tu soulèves.<span>Kayam fait le reste.</span></h2></div>
+  </section>
+
   <section class="feat" id="seance">
     <div class="wrap">
       <div class="text rv">
@@ -207,6 +233,16 @@
       <div class="stage rv">
         <div class="glow"></div>
         <div class="phone"><img data-shot="seance" src="img/v2/seance-fr.jpg" alt="" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fband">
+    <div class="wrap">
+      <p class="rv" data-i="fband">Ce que tu manges compte autant que ce que tu soulèves.</p>
+      <div class="grid">
+        <img class="rv" src="img/food-salmon.jpg" alt="" loading="lazy">
+        <img class="rv" src="img/food-berries.jpg" alt="" loading="lazy">
       </div>
     </div>
   </section>
@@ -298,6 +334,7 @@
   <a href="mailto:kayam.support@gmail.com" data-i="ft2">Contact</a>
   <a href="il/" lang="he">עברית</a>
   <div style="margin-top:14px">© <span id="year"></span> Kayam</div>
+  <div style="margin-top:6px;font-size:12px;opacity:.7"><span data-i="credits">Photos</span> : <a href="https://unsplash.com" style="margin:0">Unsplash</a> · <span data-i="video">Vidéo</span> : <a href="https://mixkit.co" style="margin:0">Mixkit</a></div>
 </footer>
 
 <script>
@@ -321,7 +358,8 @@ const EN = {
   p1x:"3-photo guided body scan", p2x:"Your calories adjust on their own to your real weigh-ins", p3x:"A program and meal plans built for you", p4x:"It tells you what to lift, set by set",
   finalT:"Finally see what's holding you back.", finalP:"Free on iPhone. To lose fat, build muscle, or both.",
   ft1:"Privacy", ft2:"Contact",
-  chip1:"↑ <b>+2.5 kg</b> today", chip2:"🏆 New record", chip3:"🔥 <b>157 g</b> of protein"
+vband:"You lift.<span>Kayam does the rest.</span>", fband:"What you eat matters as much as what you lift.", credits:"Photos", video:"Video",
+    chip1:"↑ <b>+2.5 kg</b> today", chip2:"🏆 New record", chip3:"🔥 <b>157 g</b> of protein"
 };
 const lang = (navigator.language || "fr").slice(0, 2);
 if (lang !== "fr") {
