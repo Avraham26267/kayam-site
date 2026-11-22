@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kayam · Ta séance et ton assiette, enfin reliées</title>
+<meta name="description" content="Kayam relie tes séances et tes repas dans une seule app, pour que ton coach voie enfin ce qui bloque. Gratuit, sans pub, sur iPhone.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#C6F24E">
+<meta property="og:title" content="Kayam">
+<meta property="og:description" content="Ta séance et ton assiette, enfin reliées.">
+<meta property="og:image" content="https://kayamfit.com/img/v2/accueil-fr.jpg">
+<link rel="icon" href="img/logo.png">
+<script>document.documentElement.classList.add("js")</script>
+<style>
+  :root {
+    --bg:#FFFFFF; --card:#F4F5F0; --ink:#0B0D0B; --soft:#3A403A; --line:rgba(11,13,11,.10);
+    --lime:#C6F24E; --lime-2:#B4E33A; --green:#0B0D0B; --deep:#0B0D0B;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+         -webkit-font-smoothing:antialiased; }
+  a { color:inherit; }
+  img { display:block; max-width:100%; }
+  .wrap { max-width:1120px; margin:0 auto; padding:0 20px; }
+
+  /* Barre du haut */
+  header { position:sticky; top:0; z-index:10; background:rgba(198,242,78,.92);
+           backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px);
+           border-bottom:1px solid var(--line); }
+  .bar { display:flex; align-items:center; gap:22px; height:64px; }
+  .logo { display:flex; align-items:center; gap:9px; font-weight:800; font-size:20px; text-decoration:none; letter-spacing:-.3px; }
+  .logo img { width:32px; height:32px; border-radius:9px; background:var(--ink); padding:5px; }
+  .bar nav { display:flex; gap:22px; margin-inline-start:auto; }
+  .bar nav a { text-decoration:none; color:var(--soft); font-size:15px; font-weight:500; }
+  .bar nav a:hover { color:var(--ink); }
+  .pill { background:var(--ink); color:#fff !important; text-decoration:none; font-weight:700; font-size:15px;
+          padding:9px 16px; border-radius:999px; }
+
+  /* Boutons App Store */
+  .store { display:inline-flex; align-items:center; gap:12px; background:var(--ink); color:#fff; text-decoration:none;
+           padding:13px 22px 13px 18px; border-radius:16px; box-shadow:0 10px 24px rgba(17,21,17,.16); }
+  .store svg { width:28px; height:28px; fill:#fff; }
+  .store small { display:block; font-size:12px; opacity:.75; line-height:1.1; }
+  .store b { display:block; font-size:20px; line-height:1.15; letter-spacing:-.2px; }
+  .store:active { transform:scale(.98); }
+
+  /* Haut de page */
+  .heroband { background:var(--lime); }
+  .hero { display:grid; gap:40px; align-items:center; padding-top:44px; padding-bottom:56px; }
+  .eyebrow { display:inline-block; font-size:13px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--lime); background:var(--ink); border-radius:999px; padding:6px 12px; margin-bottom:16px; }
+  h1 { font-size:42px; line-height:1.06; letter-spacing:-1.2px; margin:0 0 18px; font-weight:850; }
+  h1 em { font-style:normal; }
+  .heroband .lead, .heroband .under, .heroband .under a { color:#1C221C; }
+  .lead { font-size:19px; color:var(--soft); margin:0 0 26px; max-width:540px; }
+  .under { margin-top:14px; font-size:14px; color:var(--soft); }
+  .under a { color:var(--soft); }
+
+  /* Téléphone (vraie capture de l'app) */
+  .phone { width:min(300px, 78vw); margin:0 auto; border-radius:44px; padding:10px; background:#0E110E;
+           box-shadow:0 30px 60px rgba(17,21,17,.22), inset 0 0 0 2px #2A302A; }
+  .phone img { border-radius:35px; width:100%; aspect-ratio:1320/2868; object-fit:cover; background:#F4F5F0; }
+  .hero .phone { width:min(320px, 80vw); }
+
+  /* Sections */
+  section.feat { padding:56px 0; border-top:1px solid var(--line); }
+  .feat .wrap { display:grid; gap:36px; align-items:center; }
+  .kicker { display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); }
+  .kicker i { width:30px; height:30px; border-radius:9px; background:var(--lime); display:inline-flex; align-items:center; justify-content:center; font-style:normal; font-size:15px; }
+  h2 { font-size:32px; line-height:1.12; letter-spacing:-.8px; margin:12px 0 14px; font-weight:820; }
+  .feat p { color:var(--soft); margin:0 0 18px; font-size:18px; max-width:520px; }
+  .ticks { list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+  .ticks li { display:flex; gap:10px; align-items:flex-start; font-size:16px; }
+  .ticks li::before { content:""; flex:0 0 20px; height:20px; margin-top:2px; border-radius:50%;
+                      background:var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%23111511' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat; }
+  .tag { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.06em; background:var(--ink); color:var(--lime); border-radius:6px; padding:2px 6px; margin-inline-start:6px; vertical-align:2px; }
+
+  /* Gratuit / Pro */
+  .plans { padding:64px 0; border-top:1px solid var(--line); }
+  .plans h2 { text-align:center; margin-bottom:28px; }
+  .plans .grid { display:grid; gap:16px; }
+  .plan { background:var(--card); border-radius:24px; padding:26px; border:1px solid var(--line); }
+  .plan h3 { margin:0 0 4px; font-size:22px; letter-spacing:-.3px; }
+  .plan .sub { color:var(--soft); margin:0 0 16px; font-size:15px; }
+  .plan.pro { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .plan.pro h3 { color:var(--lime); }
+  .plan.pro .sub { color:#D8DCD6; }
+  .plan.pro .ticks li::before { background-color:var(--lime); }
+
+  /* Fin */
+  .final { text-align:center; padding:72px 0 64px; background:var(--lime); }
+  .final p { color:#1C221C !important; }
+  .final h2 { font-size:36px; margin:0 0 12px; }
+  .final p { color:var(--soft); margin:0 0 26px; font-size:18px; }
+
+  footer { text-align:center; color:var(--soft); font-size:14px; padding:28px 0 40px; border-top:1px solid var(--line); }
+  footer a { color:var(--soft); margin:0 9px; }
+
+  /* Téléphone : on cache les liens du menu, on garde le bouton */
+  @media (max-width: 719px) {
+    .bar nav a:not(.pill) { display:none; }
+  }
+
+  /* Ordinateur : 2 colonnes, téléphone à côté du texte */
+  @media (min-width: 900px) {
+    .wrap { padding:0 40px; }
+    .hero { grid-template-columns: 1.15fr .85fr; padding-top:72px; padding-bottom:80px; gap:56px; }
+    h1 { font-size:64px; letter-spacing:-2px; }
+    .lead { font-size:21px; }
+    section.feat { padding:88px 0; }
+    .feat .wrap { grid-template-columns: 1fr 1fr; gap:72px; }
+    .feat.flip .text { order:2; }
+    h2 { font-size:44px; letter-spacing:-1.2px; }
+    .plans .grid { grid-template-columns: 1fr 1fr; max-width:920px; margin:0 auto; }
+    .final h2 { font-size:48px; }
+  }
+
+  /* ---------- Animations Kayam ---------- */
+  .heroband { overflow:hidden; }
+  .stage { position:relative; display:grid; place-items:center; padding:24px 0; }
+  .glow { position:absolute; width:86%; max-width:420px; aspect-ratio:1; border-radius:50%; z-index:0;
+          background:radial-gradient(circle, rgba(198,242,78,.85) 0%, rgba(198,242,78,0) 66%); filter:blur(28px);
+          animation:breathe 4.5s ease-in-out infinite; }
+  .heroband .glow { background:radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 66%); }
+  .stage .phone { position:relative; z-index:1; }
+  .float { animation:float 6s ease-in-out infinite; }
+  .chip { position:absolute; z-index:2; background:#fff; color:var(--ink); font-weight:750; font-size:14px; line-height:1;
+          padding:10px 14px; border-radius:14px; white-space:nowrap; box-shadow:0 12px 26px rgba(11,13,11,.18);
+          opacity:0; animation:pop .7s cubic-bezier(.2,1.5,.4,1) forwards, bob 5s ease-in-out infinite; }
+  .chip.dark { background:var(--ink); color:var(--lime); }
+  .chip.c1 { top:10%; left:0; animation-delay:.7s, 1.4s; }
+  .chip.c2 { top:44%; right:0; animation-delay:1s, 1.9s; }
+  .chip.c3 { bottom:9%; left:4%; animation-delay:1.3s, 2.4s; }
+  .star { position:absolute; z-index:2; color:var(--lime-2); font-size:22px; text-shadow:0 0 12px rgba(198,242,78,.9);
+          animation:twinkle 2.6s ease-in-out infinite; pointer-events:none; }
+  .star.s2 { font-size:14px; animation-delay:.6s; } .star.s3 { font-size:18px; animation-delay:1.2s; }
+  .star.s4 { font-size:12px; animation-delay:1.8s; } .star.s5 { font-size:16px; animation-delay:.3s; }
+  .store, .pill { transition:transform .2s ease, box-shadow .2s ease; }
+  .store:hover { transform:translateY(-3px); box-shadow:0 16px 30px rgba(11,13,11,.22); }
+  .pill:hover { transform:translateY(-1px); }
+  h1 .w { display:inline-block; opacity:0; transform:translateY(.45em); animation:rise .75s cubic-bezier(.2,.8,.2,1) forwards;
+          animation-delay:calc(var(--i) * 70ms + 120ms); }
+  .js .rv { opacity:0; transform:translateY(30px); transition:opacity .8s ease, transform .9s cubic-bezier(.2,.8,.2,1); }
+  .js .feat .stage.rv { transform:translateX(48px) rotate(3deg) scale(.96); }
+  .js .feat.flip .stage.rv { transform:translateX(-48px) rotate(-3deg) scale(.96); }
+  .js .rv.in { opacity:1; transform:none; }
+  @keyframes breathe { 0%,100% { transform:scale(.9); opacity:.75; } 50% { transform:scale(1.08); opacity:1; } }
+  @keyframes float { 0%,100% { transform:translateY(0) rotate(-1deg); } 50% { transform:translateY(-14px) rotate(1deg); } }
+  @keyframes pop { from { opacity:0; transform:scale(.6) translateY(10px); } to { opacity:1; transform:none; } }
+  @keyframes bob { 0%,100% { translate:0 0; } 50% { translate:0 -7px; } }
+  @keyframes twinkle { 0%,100% { opacity:.25; transform:scale(.7) rotate(0); } 50% { opacity:1; transform:scale(1.15) rotate(20deg); } }
+  @keyframes rise { to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation:none !important; transition:none !important; }
+    .chip, h1 .w, .js .rv { opacity:1 !important; transform:none !important; }
+  }
+
+  /* ---------- Images ---------- */
+  .vband { position:relative; height:min(62vh, 560px); min-height:340px; overflow:hidden; background:#0B0D0B; }
+  .vband video, .vband img.poster { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .vband::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,13,11,.15), rgba(11,13,11,.65)); }
+  .vband .cap { position:absolute; z-index:1; left:0; right:0; bottom:0; padding:0 20px 44px; max-width:1120px; margin:0 auto; color:#fff; }
+  .vband h2 { font-size:44px; margin:0; letter-spacing:-1.2px; line-height:1.02; }
+  .vband h2 span { color:var(--lime); display:block; }
+  .fband { padding:64px 0 8px; }
+  .fband .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .fband img { width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:26px; transition:transform .6s cubic-bezier(.2,.8,.2,1); }
+  .fband img:hover { transform:scale(1.02) rotate(-.4deg); }
+  .fband p { font-size:26px; font-weight:800; letter-spacing:-.6px; line-height:1.15; margin:0 0 22px; max-width:640px; }
+  @media (min-width: 900px) {
+    .vband .cap { padding:0 40px 64px; }
+    .vband h2 { font-size:84px; letter-spacing:-3px; }
+    .fband { padding:96px 0 8px; }
+    .fband .grid { grid-template-columns:1.25fr 1fr; gap:20px; }
+    .fband img { aspect-ratio:auto; height:460px; }
+    .fband p { font-size:40px; letter-spacing:-1px; }
+  }
+
+  /* ---------- V3 : éventail 3D ---------- */
+  .fan { perspective:1400px; padding:36px 0; }
+  .fan .tilt { position:relative; display:grid; place-items:center; transform-style:preserve-3d;
+               transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); transition:transform .25s ease-out; z-index:1; }
+  .fan .phone { grid-area:1/1; width:min(270px, 58vw); }
+  .fan .p-c { z-index:3; animation:float 6s ease-in-out infinite; }
+  .fan .p-l { z-index:1; opacity:.97; animation:fanL 7s ease-in-out infinite; }
+  .fan .p-r { z-index:2; opacity:.97; animation:fanR 7.5s ease-in-out infinite; }
+  @keyframes fanL { 0%,100% { transform:translateX(-46%) translateY(26px) rotate(-10deg) scale(.84); } 50% { transform:translateX(-48%) translateY(14px) rotate(-11deg) scale(.84); } }
+  @keyframes fanR { 0%,100% { transform:translateX(46%) translateY(30px) rotate(10deg) scale(.84); } 50% { transform:translateX(48%) translateY(18px) rotate(11deg) scale(.84); } }
+  .fan .chip { z-index:5; }
+  .fan .chip.c1 { left:2%; } .fan .chip.c2 { right:2%; } .fan .chip.c3 { left:8%; }
+
+  /* ---------- Bande défilante ---------- */
+  .marquee { background:var(--ink); color:var(--lime); overflow:hidden; padding:16px 0; border-block:2px solid var(--ink); }
+  .marquee .track { display:flex; width:max-content; animation:marq 26s linear infinite; }
+  .marquee span { font-size:30px; font-weight:900; letter-spacing:-.5px; white-space:nowrap; }
+  @keyframes marq { to { transform:translateX(-50%); } }
+
+  /* ---------- Vidéo qui zoome ---------- */
+  .vband video { transform:scale(var(--z,1.15)); will-change:transform; }
+
+  /* ---------- Histoire au défilement ---------- */
+  .story { border-top:1px solid var(--line); }
+  .step { padding:56px 0; border-bottom:1px solid var(--line); }
+  .step:last-child { border-bottom:0; }
+  .step p { color:var(--soft); margin:0 0 18px; font-size:18px; max-width:520px; }
+  .mstage { margin-top:28px; }
+  .sticky { display:none; }
+  .phone.stack { position:relative; }
+  .phone.stack::before { content:""; display:block; aspect-ratio:1320/2868; }
+  .phone.stack .sc { position:absolute; top:10px; left:10px; width:calc(100% - 20px); opacity:0;
+                     transform:translateY(18px) scale(.97); transition:opacity .55s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .phone.stack .sc.on { opacity:1; transform:none; }
+  .sticky .star { opacity:0; transition:opacity .5s; }
+  .sticky.s2 .star { opacity:1; }
+  .dots { display:flex; gap:8px; justify-content:center; margin-top:18px; }
+  .dots i { width:8px; height:8px; border-radius:99px; background:rgba(11,13,11,.18); transition:all .35s; }
+  .dots i.on { width:28px; background:var(--ink); }
+
+  /* ---------- Compteurs ---------- */
+  .stats { background:var(--ink); color:#fff; padding:56px 0; }
+  .stats .sg { display:grid; grid-template-columns:1fr 1fr; gap:28px 16px; }
+  .st b { display:block; font-size:48px; font-weight:900; letter-spacing:-2px; color:var(--lime); line-height:1; font-variant-numeric:tabular-nums; }
+  .st span { display:block; margin-top:8px; color:#D8DCD6; font-size:15px; }
+
+  @media (min-width: 900px) {
+    .fan .phone { width:300px; }
+    .marquee span { font-size:56px; letter-spacing:-1.5px; }
+    .sgrid { display:grid; grid-template-columns:1fr 1fr; gap:72px; }
+    .step { min-height:82vh; display:flex; align-items:center; border-bottom:0; opacity:.22; transition:opacity .5s ease; }
+    .step.active { opacity:1; }
+    .step .mstage { display:none; }
+    .step h2 { font-size:48px; }
+    .sticky { display:block; position:sticky; top:9vh; height:82vh; align-self:start; padding-top:2vh; }
+    .sticky .phone { width:300px; }
+    .stats { padding:88px 0; }
+    .stats .sg { grid-template-columns:repeat(4,1fr); }
+    .st b { font-size:84px; letter-spacing:-3px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .marquee .track { animation:none; } .vband video { transform:none; } }
+</style>
+</head>
+<body id="top">
+
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="#top"><img src="img/logo.png" alt="">kayam</a>
+    <nav>
+      <a href="#seance" data-i="nav1">Séance</a>
+      <a href="#repas" data-i="nav2">Repas</a>
+      <a href="#progres" data-i="nav3">Progrès</a>
+      <a class="pill" href="https://apps.apple.com/app/id6819856907" data-i="dl">Télécharger</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="heroband"><div class="wrap hero">
+    <div>
+      <span class="eyebrow" data-i="eyebrow">Ton coach de poche</span>
+      <h1 data-i="h1" data-html>Ta séance et ton assiette, <em>enfin reliées.</em></h1>
+      <p class="lead" data-i="lead">Tu t'entraînes, tu manges… et dans le miroir, ça bouge pas&nbsp;? Kayam relie tes séances et tes repas dans une seule app, pour que ton coach voie enfin ce qui bloque. Perdre du gras, prendre du muscle, ou les deux.</p>
+      <a class="store" href="https://apps.apple.com/app/id6819856907">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.72-1.35-.14-2.64.8-3.33.8-.69 0-1.74-.78-2.87-.76-1.47.02-2.83.86-3.59 2.18-1.53 2.66-.39 6.6 1.1 8.75.73 1.05 1.6 2.24 2.73 2.2 1.1-.05 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.07 2.65-2.13.84-1.22 1.18-2.4 1.2-2.46-.03-.01-2.3-.88-2.3-3.53zM14.2 6.16c.6-.73 1.01-1.75.9-2.76-.87.04-1.92.58-2.54 1.31-.56.64-1.05 1.68-.92 2.67.97.08 1.96-.49 2.56-1.22z"/></svg>
+        <span><small data-i="store1">Télécharger dans l'</small><b>App Store</b></span>
+      </a>
+      <div class="under"><span data-i="under">Gratuit · sans pub · iPhone</span> · <a href="il/" lang="he">בעברית</a></div>
+    </div>
+    <div class="stage fan" id="fan">
+      <div class="glow"></div>
+      <div class="tilt">
+        <div class="phone p-l"><img data-shot="repas" src="img/v2/repas-fr.jpg" alt=""></div>
+        <div class="phone p-r"><img data-shot="progres" src="img/v2/progres-fr.jpg" alt=""></div>
+        <div class="phone p-c"><img data-shot="accueil" src="img/v2/accueil-fr.jpg" alt="Kayam&nbsp;: l'écran Accueil avec le coach"></div>
+      </div>
+      <span class="chip c1" data-i="chip1" data-html>↑ <b>+2,5 kg</b> aujourd'hui</span>
+      <span class="chip dark c2" data-i="chip2">🏆 Nouveau record</span>
+      <span class="chip c3" data-i="chip3" data-html>🔥 <b>157 g</b> de protéines</span>
+    </div>
+  </div></div>
+
+  <div class="marquee" aria-hidden="true"><div class="track"><span data-i="mq">TA SÉANCE ✦ TON ASSIETTE ✦ TES PROGRÈS ✦&nbsp;</span><span data-i="mq">TA SÉANCE ✦ TON ASSIETTE ✦ TES PROGRÈS ✦&nbsp;</span><span data-i="mq">TA SÉANCE ✦ TON ASSIETTE ✦ TES PROGRÈS ✦&nbsp;</span><span data-i="mq">TA SÉANCE ✦ TON ASSIETTE ✦ TES PROGRÈS ✦&nbsp;</span><span data-i="mq">TA SÉANCE ✦ TON ASSIETTE ✦ TES PROGRÈS ✦&nbsp;</span><span data-i="mq">TA SÉANCE ✦ TON ASSIETTE ✦ TES PROGRÈS ✦&nbsp;</span></div></div>
+
+  <section class="vband" aria-label="Kayam">
+    <video autoplay muted loop playsinline preload="metadata" poster="img/gym-poster.jpg"><source src="img/gym.mp4" type="video/mp4"></video>
+    <div class="cap"><h2 class="rv" data-i="vband" data-html>Tu soulèves.<span>Kayam fait le reste.</span></h2></div>
+  </section>
+
+  <section class="story" id="seance">
+    <div class="wrap sgrid">
+      <div class="steps">
+      <div class="step" data-step="0">
+        <div class="stxt">
+        <span class="kicker"><i>🏋️</i><span data-i="k1">Séance</span></span>
+        <h2 data-i="h2a">Il te dit quoi soulever aujourd'hui.</h2>
+        <p data-i="p1">Ta séance du jour est prête. Note tes séries, tes charges et tes répétitions en quelques secondes, avec le temps de repos.</p>
+        <ul class="ticks">
+          <li data-i="s1">Tes records et ta progression en force</li>
+          <li data-i="s2">Live Activity sur l'écran verrouillé pendant ta séance</li>
+          <li data-i="s3">Importe ton historique depuis Hevy ou Strong</li>
+        </ul>
+      </div>
+        <div class="stage mstage"><div class="glow"></div><div class="phone"><img data-shot="seance" src="img/v2/seance-fr.jpg" alt="" loading="lazy"></div></div>
+      </div>
+      <div class="step" data-step="1" id="repas">
+        <div class="stxt">
+        <span class="kicker"><i>🍳</i><span data-i="k2">Repas</span></span>
+        <h2 data-i="h2b">Tu sais toujours ce qu'il te reste à manger.</h2>
+        <p data-i="p2">Calories, protéines, glucides et lipides. Scanner de code-barres, grande base d'aliments, et «&nbsp;Je mange quoi&nbsp;?&nbsp;»&nbsp;: 3 idées pour ce qu'il te reste aujourd'hui.</p>
+        <ul class="ticks">
+          <li data-i="r1">Un écart ? Étale les calories sur les jours suivants, sans culpabiliser</li>
+          <li data-i="r2" data-html>Un repas en une photo, ou juste en le disant <span class="tag">PRO</span></li>
+          <li data-i="r3" data-html>Des plans de repas avec de vraies recettes <span class="tag">PRO</span></li>
+        </ul>
+      </div>
+        <div class="stage mstage"><div class="glow"></div><div class="phone"><img data-shot="repas" src="img/v2/repas-fr.jpg" alt="" loading="lazy"></div></div>
+      </div>
+      <div class="step" data-step="2" id="progres">
+        <div class="stxt">
+        <span class="kicker"><i>📈</i><span data-i="k3">Progrès</span></span>
+        <h2 data-i="h2c">Chaque jour réussi allume une étoile.</h2>
+        <p data-i="p3">Ta séance et ton assiette, côte à côte. Poids, mesures, records et graphiques clairs, pour voir que ça avance vraiment.</p>
+        <ul class="ticks">
+          <li data-i="g1">Ton bilan de la semaine en un coup d'œil</li>
+          <li data-i="g2">Des amis pour se motiver</li>
+          <li data-i="g3">Ta séance à partager en un geste</li>
+        </ul>
+      </div>
+        <div class="stage mstage"><div class="glow"></div><div class="phone"><img data-shot="progres" src="img/v2/progres-fr.jpg" alt="" loading="lazy"></div></div>
+      </div>
+      </div>
+      <div class="sticky" id="sticky">
+        <div class="stage">
+          <div class="glow"></div>
+          <div class="phone stack">
+            <img class="sc on" data-shot="seance" src="img/v2/seance-fr.jpg" alt="">
+            <img class="sc" data-shot="repas" src="img/v2/repas-fr.jpg" alt="">
+            <img class="sc" data-shot="progres" src="img/v2/progres-fr.jpg" alt="">
+          </div>
+          <span class="star" style="top:6%;left:10%">✦</span><span class="star s2" style="top:20%;right:6%">✦</span>
+          <span class="star s3" style="top:58%;left:2%">✦</span><span class="star s4" style="bottom:12%;right:12%">✦</span>
+          <span class="star s5" style="bottom:32%;right:0">✦</span>
+        </div>
+        <div class="dots"><i class="on"></i><i></i><i></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fband">
+    <div class="wrap">
+      <p class="rv" data-i="fband">Ce que tu manges compte autant que ce que tu soulèves.</p>
+      <div class="grid">
+        <img class="rv" src="img/food-salmon.jpg" alt="" loading="lazy">
+        <img class="rv" src="img/food-berries.jpg" alt="" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="wrap sg">
+      <div class="st rv"><b data-count="3400" data-plus="+">0</b><span data-i="st1">aliments</span></div>
+      <div class="st rv"><b data-count="250" data-plus="+">0</b><span data-i="st2">exercices</span></div>
+      <div class="st rv"><b data-count="0">0</b><span data-i="st3">pub</span></div>
+      <div class="st rv"><b data-count="3">0</b><span data-i="st4">langues : FR, EN, עברית</span></div>
+    </div>
+  </section>
+
+  <section class="plans">
+    <div class="wrap">
+      <h2 class="rv" data-i="plansT">Gratuit pour suivre. Pro pour aller plus loin.</h2>
+      <div class="grid">
+        <div class="plan rv">
+          <h3 data-i="freeT">Gratuit, sans pub</h3>
+          <p class="sub" data-i="freeS">Tout ce qu'il faut pour suivre tes séances et tes repas.</p>
+          <ul class="ticks">
+            <li data-i="f1">Séries, charges, répétitions et temps de repos</li>
+            <li data-i="f2">3 routines à toi, tes records et ta progression</li>
+            <li data-i="f3">Calories, macros et scanner de code-barres</li>
+            <li data-i="f4">Poids, mesures, graphiques et amis</li>
+          </ul>
+        </div>
+        <div class="plan pro rv">
+          <h3>Kayam Pro</h3>
+          <p class="sub" data-i="proS">7 jours gratuits sur l'offre annuelle. Kayam fait le travail pour toi.</p>
+          <ul class="ticks">
+            <li data-i="p1x">Scan du corps en 3 photos guidées</li>
+            <li data-i="p2x">Tes calories s'ajustent toutes seules à ta vraie pesée</li>
+            <li data-i="p3x">Un programme et des plans de repas créés pour toi</li>
+            <li data-i="p4x">Il te dit quoi soulever, série par série</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <h2 class="rv" data-i="finalT">Vois enfin ce qui bloque.</h2>
+      <p data-i="finalP">Gratuit sur iPhone. Pour perdre du gras, prendre du muscle, ou les deux.</p>
+      <a class="store" href="https://apps.apple.com/app/id6819856907">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.72-1.35-.14-2.64.8-3.33.8-.69 0-1.74-.78-2.87-.76-1.47.02-2.83.86-3.59 2.18-1.53 2.66-.39 6.6 1.1 8.75.73 1.05 1.6 2.24 2.73 2.2 1.1-.05 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.07 2.65-2.13.84-1.22 1.18-2.4 1.2-2.46-.03-.01-2.3-.88-2.3-3.53zM14.2 6.16c.6-.73 1.01-1.75.9-2.76-.87.04-1.92.58-2.54 1.31-.56.64-1.05 1.68-.92 2.67.97.08 1.96-.49 2.56-1.22z"/></svg>
+        <span><small data-i="store1">Télécharger dans l'</small><b>App Store</b></span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <a href="privacy.html" data-i="ft1">Confidentialité</a>
+  <a href="privacy.html#en">Privacy</a>
+  <a href="mailto:kayam.support@gmail.com" data-i="ft2">Contact</a>
+  <a href="il/" lang="he">עברית</a>
+  <div style="margin-top:14px">© <span id="year"></span> Kayam</div>
+  <div style="margin-top:6px;font-size:12px;opacity:.7"><span data-i="credits">Photos</span> : <a href="https://unsplash.com" style="margin:0">Unsplash</a> · <span data-i="video">Vidéo</span> : <a href="https://mixkit.co" style="margin:0">Mixkit</a></div>
+</footer>
+
+<script>
+// Langue : français par défaut, anglais pour les autres (comme avant)
+const EN = {
+  nav1:"Workouts", nav2:"Meals", nav3:"Progress", dl:"Download", eyebrow:"Your pocket coach",
+  h1:"Your workouts and your meals, <em>finally linked.</em>",
+  lead:"Training hard, eating a lot… and the mirror isn't changing? Kayam links your workouts and your meals in one app, so your coach finally sees what's holding you back. Lose fat, build muscle, or both.",
+  store1:"Download on the", under:"Free · no ads · iPhone",
+  k1:"Workouts", h2a:"It tells you what to lift today.", p1:"Today's workout is ready. Log your sets, weights and reps in seconds, with a rest timer.",
+  s1:"Your records and your strength progress", s2:"Live Activity on your Lock Screen during workouts", s3:"Import your history from Hevy or Strong",
+  k2:"Meals", h2b:"You always know what's left to eat.", p2:"Calories, protein, carbs and fat. Barcode scanner, a big food database, and \"What do I eat?\": 3 ideas for what you have left today.",
+  r1:"Slipped up? Spread the extra calories over the next days, no guilt",
+  r2:"Log a meal with one photo, or just by saying it <span class=\"tag\">PRO</span>",
+  r3:"Meal plans with real recipes <span class=\"tag\">PRO</span>",
+  k3:"Progress", h2c:"Every great day lights a star.", p3:"Your workouts and your plate, side by side. Weight, measurements, records and clear charts, so you see it's really working.",
+  g1:"Your week at a glance", g2:"Friends to keep you going", g3:"Share your workout in one tap",
+  plansT:"Free to track. Pro to go further.", freeT:"Free, no ads", freeS:"Everything you need to track your workouts and meals.",
+  f1:"Sets, weights, reps and rest timer", f2:"3 routines of your own, records and progress", f3:"Calories, macros and barcode scanner", f4:"Weight, measurements, charts and friends",
+  proS:"7 days free on the yearly plan. Kayam does the work for you.",
+  p1x:"3-photo guided body scan", p2x:"Your calories adjust on their own to your real weigh-ins", p3x:"A program and meal plans built for you", p4x:"It tells you what to lift, set by set",
+  finalT:"Finally see what's holding you back.", finalP:"Free on iPhone. To lose fat, build muscle, or both.",
+  ft1:"Privacy", ft2:"Contact",
+vband:"You lift.<span>Kayam does the rest.</span>", fband:"What you eat matters as much as what you lift.", credits:"Photos", video:"Video",
+  mq:"YOUR WORKOUT ✦ YOUR PLATE ✦ YOUR PROGRESS ✦ ", st1:"foods", st2:"exercises", st3:"ads", st4:"languages: EN, FR, עברית",
+  chip1:"↑ <b>+2.5 kg</b> today", chip2:"🏆 New record", chip3:"🔥 <b>157 g</b> of protein"
+};
+const lang = (navigator.language || "fr").slice(0, 2);
+if (lang !== "fr") {
+  document.documentElement.lang = "en";
+  document.title = "Kayam · Your workouts and your meals, finally linked";
+  document.querySelectorAll("[data-i]").forEach(el => {
+    const t = EN[el.dataset.i]; if (!t) return;
+    if (el.hasAttribute("data-html")) el.innerHTML = t; else el.textContent = t;
+  });
+  document.querySelectorAll("img[data-shot]").forEach(img => { img.src = "img/v2/" + img.dataset.shot + "-en.jpg"; });
+  document.querySelector('footer a[href="privacy.html#en"]').remove();
+}
+document.getElementById("year").textContent = new Date().getFullYear();
+// Animations : titre mot par mot + apparition au défilement
+document.documentElement.classList.add("js");
+(function splitTitle(){
+  const h = document.querySelector("h1"); let i = 0;
+  const walk = node => [...node.childNodes].forEach(n => {
+    if (n.nodeType === 3) {
+      const frag = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+        const w = document.createElement("span"); w.className = "w"; w.style.setProperty("--i", i++); w.textContent = part; frag.appendChild(w);
+      });
+      n.replaceWith(frag);
+    } else walk(n);
+  });
+  walk(h);
+})();
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold:.18 });
+// V3 : inclinaison 3D, zoom vidéo, histoire au défilement, compteurs
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fan = document.getElementById("fan");
+if (fan && !reduce && matchMedia("(hover:hover)").matches) {
+  document.querySelector(".heroband").addEventListener("mousemove", e => {
+    const r = fan.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    fan.style.setProperty("--ry", (x * 14).toFixed(2) + "deg"); fan.style.setProperty("--rx", (-y * 10).toFixed(2) + "deg");
+  });
+  document.querySelector(".heroband").addEventListener("mouseleave", () => { fan.style.setProperty("--ry","0deg"); fan.style.setProperty("--rx","0deg"); });
+}
+const vb = document.querySelector(".vband"), vid = vb && vb.querySelector("video");
+function onScroll() {
+  if (vid && !reduce) {
+    const r = vb.getBoundingClientRect(), p = Math.min(1, Math.max(0, 1 - (r.top + r.height) / (innerHeight + r.height)));
+    vid.style.setProperty("--z", (1.18 - p * .18).toFixed(3));
+  }
+}
+addEventListener("scroll", onScroll, { passive:true }); onScroll();
+const steps = [...document.querySelectorAll(".step")], scs = [...document.querySelectorAll(".sticky .sc")],
+      dots = [...document.querySelectorAll(".dots i")], sticky = document.getElementById("sticky");
+const so = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  const i = +e.target.dataset.step;
+  steps.forEach((s, k) => s.classList.toggle("active", k === i));
+  scs.forEach((s, k) => s.classList.toggle("on", k === i));
+  dots.forEach((d, k) => d.classList.toggle("on", k === i));
+  sticky.classList.toggle("s2", i === 2);
+}), { rootMargin:"-45% 0px -45% 0px" });
+steps.forEach(s => so.observe(s)); if (steps[0]) steps[0].classList.add("active");
+const fr = document.documentElement.lang === "fr";
+const co = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return; co.unobserve(e.target);
+  const el = e.target, to = +el.dataset.count, plus = el.dataset.plus || "", t0 = performance.now(), d = reduce ? 0 : 1400;
+  const fmt = n => n.toLocaleString(fr ? "fr-FR" : "en-US");
+  (function tick(t) { const k = d ? Math.min(1, (t - t0) / d) : 1, v = Math.round(to * (1 - Math.pow(1 - k, 3)));
+    el.textContent = fmt(v) + (k === 1 ? plus : ""); if (k < 1) requestAnimationFrame(tick); })(t0);
+}), { threshold:.5 });
+document.querySelectorAll("[data-count]").forEach(el => co.observe(el));
+document.querySelectorAll(".rv").forEach((el, k) => { el.style.transitionDelay = (el.classList.contains("plan") && el.classList.contains("pro") ? .12 : 0) + "s"; io.observe(el); });
+</script>
+</body>
+</html>
