@@ -2,6 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://ezkyuvdndslkoeiegorg.supabase.co; connect-src 'self' https://ezkyuvdndslkoeiegorg.supabase.co wss://ezkyuvdndslkoeiegorg.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+<!-- 25 nov. (audit) : la page ne parle qu'à Kayam et Supabase ; et personne ne peut la mettre dans un cadre -->
+<script>if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location; } catch (e) {} }</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kayam · Mon compte</title>
 <meta name="robots" content="noindex">
@@ -194,7 +197,7 @@
   <div class="bigname" aria-hidden="true">kayam<span>.</span></div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script>
 // Mon compte : lit la copie privée que l'app sauvegarde (table user_data, chacun ne lit que la sienne).
 // Rien n'est modifié ici : on regarde seulement. Tout le texte est inséré en textContent (jamais en HTML).

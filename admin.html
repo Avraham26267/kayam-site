@@ -2,6 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://ezkyuvdndslkoeiegorg.supabase.co; connect-src 'self' https://ezkyuvdndslkoeiegorg.supabase.co wss://ezkyuvdndslkoeiegorg.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+<!-- 25 nov. (audit) : la page ne parle qu'à Kayam et Supabase ; et personne ne peut la mettre dans un cadre -->
+<script>if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location; } catch (e) {} }</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kayam · Admin</title>
 <meta name="robots" content="noindex, nofollow">
